@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isTeacher() {
+      return signedIn() && exists(/databases/$(database)/documents/teachers/$(request.auth.uid));
+    }
+
+    function isOwner(data) {
+      return signedIn() && data.uid == request.auth.uid;
+    }
+
+    function classDoc(code) {
+      return get(/databases/$(database)/documents/classes/$(code)).data;
+    }
+
+    function validCreation(d) {
+      return d.keys().hasOnly(['uid', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['uid', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'createdAt', 'updatedAt'])
+        && d.uid == request.auth.uid
+        && d.classCode is string
+        && d.classCode.size() >= 1
+        && d.classCode.size() <= 20
+        && d.classCode.matches('^[A-Za-z0-9_-]+$')
+        && d.no is int
+        && d.no >= 1
+        && d.no <= 60
+        && d.joinKey is string
+        && classDoc(d.classCode).open == true
+        && classDoc(d.classCode).joinKey == d.joinKey
+        && d.beats in [4, 8, 16]
+        && d.fill in [0, 1]
+        && d.cells is list
+        && d.cells.size() == d.beats;
+    }
+
+    match /creations/{creationId} {
+      allow get: if signedIn() && (resource == null || resource.data.uid == request.auth.uid || isTeacher());
+      allow list: if isOwner(resource.data) || isTeacher();
+
+      allow create: if signedIn()
+        && validCreation(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isOwner(resource.data)
+        && validCreation(request.resource.data)
+        && request.resource.data.classCode == resource.data.classCode
+        && request.resource.data.no == resource.data.no
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if isOwner(resource.data) || isTeacher();
+    }
+
+    match /classes/{classCode} {
+      allow read, write: if isTeacher();
+    }
+
+    match /teachers/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
