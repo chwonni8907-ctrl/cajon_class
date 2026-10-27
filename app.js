@@ -138,12 +138,13 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
   if(!j||!j.classCode){box.innerHTML='<p class="hint" style="margin:0">선생님이 보여 주는 QR 코드로 들어오면 작품을 저장하고 제출할 수 있어요. 지금 만든 리듬은 이 기기에만 저장돼요.</p>';return}
   let ty=lsGet('cajon-type')==='group'?'group':'solo';
   const draw=()=>{const g=ty==='group',no=lsGet(g?'cajon-gno':'cajon-no')||'';
-    box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b><span class="seg" role="group" aria-label="내는 방법"><button class="seg-b${g?'':' on'}" data-t="solo">개인</button><button class="seg-b${g?' on':''}" data-t="group">모둠</button></span><label>${g?'모둠 번호':'번호'} <input id="no" type="number" min="1" max="${g?30:60}" inputmode="numeric" value="${esc(no)}"></label></div><div class="svrow"><button class="alt" id="sd">임시 저장</button><button id="sb">제출하기</button><button class="alt" id="sf">피드백 보기</button><button class="alt" id="sx">반 바꾸기</button></div><p class="hint" id="smsg" style="margin-bottom:0">${g?'모둠 작품은 모둠 번호마다 하나만 저장돼요. 같은 모둠 친구가 저장하면 그 작품에 덮어써지니, 저장하기 전에 모둠 친구와 확인해요. ':'지금 보이는 '+sz+'비트 리듬이에요. '}<b>제출하기</b>를 눌러야 선생님이 볼 수 있고, 제출하면 고칠 수 없어요.</p>`;
+    box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b><span class="seg" role="group" aria-label="내는 방법"><button class="seg-b${g?'':' on'}" data-t="solo">개인</button><button class="seg-b${g?' on':''}" data-t="group">모둠</button></span>${g?`<label>내 번호 <input id="mn" type="number" min="1" max="60" inputmode="numeric" value="${esc(lsGet('cajon-no')||'')}"></label><button class="alt" id="fg">내 모둠 찾기</button>`:''}<label>${g?'모둠 번호':'번호'} <input id="no" type="number" min="1" max="${g?30:60}" inputmode="numeric" value="${esc(no)}"></label></div><div class="svrow"><button class="alt" id="sd">임시 저장</button><button id="sb">제출하기</button><button class="alt" id="sf">피드백 보기</button><button class="alt" id="sx">반 바꾸기</button></div><p class="hint" id="smsg" style="margin-bottom:0">${g?'모둠 작품은 모둠 번호마다 하나만 저장돼요. 같은 모둠 친구가 저장하면 그 작품에 덮어써지니, 저장하기 전에 모둠 친구와 확인해요. ':'지금 보이는 '+sz+'비트 리듬이에요. '}<b>제출하기</b>를 눌러야 선생님이 볼 수 있고, 제출하면 고칠 수 없어요.</p>`;
     box.querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{ty=b.dataset.t;lsSet('cajon-type',ty);draw()});
     $('#sx').onclick=()=>{try{localStorage.removeItem('cajon-join')}catch(e){}renderSave()};
     const go=async submit=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60;
       if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
       if(!cur.some(x=>x)){m.textContent='먼저 칸에 아이콘을 넣어 리듬을 만들어 주세요.';return}
+      if(g){try{const F0=await fb(),gp=await F0.getGroups(j.classCode);if(gp&&gp.count&&v>gp.count){m.textContent='이 반의 모둠은 1~'+gp.count+'모둠이에요.';return}}catch(e){}}
       const who=(g?'모둠 '+v:v+'번')+', '+sz+'비트';
       if(submit&&!confirm(who+' 작품을 제출할까요? 제출하면 고칠 수 없어요.'))return;
       lsSet(g?'cajon-gno':'cajon-no',v);$('#sb').disabled=true;$('#sd').disabled=true;m.textContent=submit?'제출하는 중…':'저장하는 중…';
@@ -152,6 +153,17 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
       catch(e){m.textContent=errMsg(e)}
       const b1=$('#sb'),b2=$('#sd');if(b1)b1.disabled=false;if(b2)b2.disabled=false};
     $('#sb').onclick=()=>go(true);$('#sd').onclick=()=>go(false);
+    const fg=$('#fg');if(fg)fg.onclick=async()=>{const m=$('#smsg'),v=parseInt($('#mn').value,10);
+      if(!(v>=1&&v<=60)){m.textContent='내 번호를 1~60 사이로 적어 주세요.';return}
+      lsSet('cajon-no',v);m.textContent='찾는 중…';
+      try{const F=await fb();const gp=await F.getGroups(j.classCode);
+        if(!gp){m.textContent='선생님이 아직 모둠을 만들지 않았어요.';return}
+        const k=gp.map&&gp.map[v];
+        if(!k){m.textContent=v+'번은 모둠에 없어요. 선생님께 물어보세요.';return}
+        $('#no').value=k;lsSet('cajon-gno',k);
+        const mates=Object.keys(gp.map).filter(x=>gp.map[x]===k).map(Number).sort((a,b)=>a-b);
+        m.textContent=v+'번은 '+k+'모둠이에요. 같은 모둠: '+mates.join(', ')+'번'}
+      catch(e){m.textContent=errMsg(e)}};
     $('#sf').onclick=async()=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60,sc=n=>n>0?n+'/5':'-';
       if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
       m.textContent='불러오는 중…';
@@ -182,7 +194,7 @@ async function renderClasses(F,u){
   try{list=await F.listClasses()}catch(e){box.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
   list.sort((a,b)=>a.id.localeCompare(b.id,'ko',{numeric:true}));
   tcache={};list.forEach(c=>tcache[c.id]=c);
-  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button></div><div class="ctl"><span class="hint">닫힌 모둠:</span>${(c.closedGroups||[]).slice().sort((x,y)=>x-y).map(n=>`<button class="alt" data-a="gopen" data-n="${n}" aria-label="모둠 ${n} 열기">모둠 ${n} ✕</button>`).join('')||'<span class="hint">없음</span>'}</div><div class="ctl"><input type="number" class="gn" min="1" max="30" inputmode="numeric" placeholder="모둠 번호" aria-label="닫을 모둠 번호"><button class="alt" data-a="gclose">모둠 닫기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
+  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button></div><div class="ctl"><span class="hint">닫힌 모둠:</span>${(c.closedGroups||[]).slice().sort((x,y)=>x-y).map(n=>`<button class="alt" data-a="gopen" data-n="${n}" aria-label="모둠 ${n} 열기">모둠 ${n} ✕</button>`).join('')||'<span class="hint">없음</span>'}</div><div class="ctl"><input type="number" class="gn" min="1" max="30" inputmode="numeric" placeholder="모둠 번호" aria-label="닫을 모둠 번호"><button class="alt" data-a="gclose">모둠 닫기</button></div><div class="ctl"><input type="number" class="gk" min="2" max="30" inputmode="numeric" placeholder="모둠 수" aria-label="만들 모둠 수"><button class="alt" data-a="gmake">모둠 만들기</button><button class="alt" data-a="gseq">번호순으로</button><button class="alt" data-a="gview">모둠 보기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
   $('#lo').onclick=async()=>{await F.logout();teacherInit()};
   $('#mk').onclick=async()=>{const c=$('#nc').value.trim();
     if(!/^[A-Za-z0-9_-]{1,20}$/.test(c)){$('#tm').textContent='반 코드는 영문, 숫자, -, _ 만 1~20자로 적어 주세요.';return}
@@ -195,10 +207,24 @@ async function renderClasses(F,u){
       else if(a==='gclose'){const n=parseInt(b.closest('.cls').querySelector('.gn').value,10);
         if(!(n>=1&&n<=30)){$('#tv').innerHTML='<p>닫을 모둠 번호를 1~30 사이로 적어 주세요.</p>';return}
         await F.setClass(c,{closedGroups:[...new Set([...(d.closedGroups||[]),n])].sort((x,y)=>x-y)});renderClasses(F,u)}
+      else if(a==='gmake'||a==='gseq'){const k=parseInt(b.closest('.cls').querySelector('.gk').value,10),n=d.studentCount||30;
+        if(!(k>=2&&k<=30&&k<=n)){$('#tv').innerHTML='<p>모둠 수를 2~'+Math.min(30,n)+' 사이로 적어 주세요. (반 인원 '+n+'명 기준이에요. 인원은 작품 보기에서 바꿔요.)</p>';return}
+        if(d.groupCount&&!confirm(c+'반의 모둠을 새로 만들까요? 지금의 모둠 편성은 바뀌어요.'))return;
+        const ids=Array.from({length:n},(_,i)=>i+1),map={};
+        if(a==='gmake'){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}ids.forEach((no,i)=>{map[no]=i%k+1})}
+        else{const base=Math.floor(n/k),ex=n%k;let p=0;for(let g=1;g<=k;g++){const sz=base+(g<=ex?1:0);for(let t=0;t<sz;t++)map[ids[p++]]=g}}
+        const g={count:k,students:n,map};await F.setGroups(c,g);d.groupCount=k;showGroups(c,g)}
+      else if(a==='gview'){const g=await F.getGroups(c);if(!g){$('#tv').innerHTML='<p>아직 만든 모둠이 없어요. 모둠 수를 적고 `모둠 만들기`를 눌러 주세요.</p>';return}showGroups(c,g)}
       else if(a==='gopen'){const n=+b.dataset.n;await F.setClass(c,{closedGroups:(d.closedGroups||[]).filter(x=>x!==n)});renderClasses(F,u)}
       else if(a==='qr')showQR(c,d);
       else if(a==='work')showWork(F,c,true)
     }catch(e){$('#tv').innerHTML='<p>'+errMsg(e,'t')+'</p>'}})}
+function showGroups(c,g){const tv=$('#tv'),by={};
+  Object.keys(g.map||{}).forEach(no=>{(by[g.map[no]]=by[g.map[no]]||[]).push(+no)});
+  const rows=[];for(let k=1;k<=g.count;k++)rows.push([k,(by[k]||[]).sort((a,b)=>a-b)]);
+  tv.innerHTML=`<h3>${esc(c)}반 모둠 (${esc(g.count)}모둠${g.students?', '+esc(g.students)+'명':''})</h3><div class="card">`+rows.map(([k,m])=>`<p style="margin:4px 0"><b>${k}모둠</b> (${m.length}명): ${m.join(', ')}</p>`).join('')+`<div class="ctl"><button class="alt" id="gcp">복사</button></div><p class="hint" style="margin-bottom:0">학생은 창작 페이지에서 <b>모둠</b>을 고르고 <b>내 모둠 찾기</b>를 누르면 자기 번호의 모둠이 자동으로 채워져요.</p></div>`;
+  $('#gcp').onclick=()=>{const t=rows.map(([k,m])=>k+'모둠: '+m.join(', ')).join('\n');if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>{$('#gcp').textContent='복사했어요'})};
+  tv.scrollIntoView({behavior:'smooth'})}
 async function showQR(c,d){const tv=$('#tv'),url=location.origin+location.pathname+'?class='+encodeURIComponent(c)+'&key='+encodeURIComponent(d.joinKey);
   tv.innerHTML=`<h3>${esc(c)}반 QR</h3><div class="card" style="text-align:center"><div id="qr" class="qrbox"></div><p class="hint" style="word-break:break-all">${esc(url)}</p><div class="ctl" style="justify-content:center"><button class="alt" id="cp">주소 복사</button></div>${d.open?'':'<p class="hint">이 반은 지금 닫혀 있어서 학생이 저장할 수 없어요.</p>'}</div>`;
   $('#cp').onclick=()=>{if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>{$('#cp').textContent='복사했어요'})};
@@ -220,7 +246,7 @@ function board(all,d){
   const stOf=arr=>arr.some(w=>w.submitted===true)?'s':(arr.length?'d':'n'),mark={s:'✓',d:'●',n:'○'},txt={s:'제출',d:'작성 중',n:'안 냄'};
   const miss=[];let h='';
   for(let i=1;i<=n;i++){const st=stOf(solo.filter(w=>w.no===i));if(st!=='s')miss.push(i);h+=`<span class="bd ${st}" aria-label="${i}번 ${txt[st]}">${i}<small>${mark[st]}</small></span>`}
-  const gn=[...new Set([...grp.map(w=>w.no),...closed])].sort((a,b)=>a-b);
+  const gn=[...new Set([...grp.map(w=>w.no),...closed,...Array.from({length:d.groupCount||0},(_,i)=>i+1)])].sort((a,b)=>a-b);
   const gh=gn.map(i=>{const st=stOf(grp.filter(w=>w.no===i));return `<span class="bd g ${st}" aria-label="모둠 ${i} ${txt[st]}">모둠 ${i}<small>${mark[st]}${closed.includes(i)?' 닫힘':''}</small></span>`}).join('');
   return `<div class="card"><div class="ctl"><b>제출 현황 (개인)</b><span class="hint">제출 ${n-miss.length} / ${n}</span><label class="hint">반 인원 <input id="cn" type="number" min="1" max="60" value="${n}" style="width:5em"></label><button class="alt" id="cs">적용</button></div><div>${h}</div>${miss.length?`<p class="hint">아직 안 낸 번호: ${miss.join(', ')}</p>`:'<p class="hint">모두 제출했어요!</p>'}${gn.length?`<div class="ctl"><b>모둠</b></div><div>${gh}</div>`:''}<p class="hint" style="margin-bottom:0">✓ 제출 · ● 작성 중 · ○ 아직 안 냄 (4·8·16비트 중 하나라도 제출하면 ✓)</p></div>`}
 function csvOf(all,d,c){

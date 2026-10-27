@@ -92,6 +92,16 @@ window.FB = {
   },
   setClass(code, patch) { return updateDoc(doc(db, "classes", code), patch); },
 
+  // ----- 모둠 편성 (번호 -> 모둠 번호) -----
+  async setGroups(code, { count, students, map }) {
+    await setDoc(doc(db, "groups", code), { count, students, map, updatedAt: serverTimestamp() });
+    await updateDoc(doc(db, "classes", code), { groupCount: count });
+  },
+  async getGroups(code) {
+    const s = await getDoc(doc(db, "groups", code));
+    return s.exists() ? s.data() : null;
+  },
+
   // ----- 선생님: 작품 보기 -----
   async listCreations(code) {
     const s = await getDocs(query(collection(db, "creations"), where("classCode", "==", code)));

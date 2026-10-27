@@ -29,7 +29,7 @@ service cloud.firestore {
         && d.type in ['solo', 'group']
         && d.no is int
         && d.no >= 1
-        && ((d.type == 'solo' && d.no <= 60) || (d.type == 'group' && d.no <= 30))
+        && ((d.type == 'solo' && d.no <= 60) || (d.type == 'group' && d.no <= classDoc(d.classCode).get('groupCount', 30)))
         && d.joinKey is string
         && classDoc(d.classCode).open == true
         && classDoc(d.classCode).joinKey == d.joinKey
@@ -81,6 +81,11 @@ service cloud.firestore {
 
     match /classes/{classCode} {
       allow read, write: if isTeacher();
+    }
+
+    match /groups/{code} {
+      allow read: if signedIn();
+      allow write: if isTeacher();
     }
 
     match /teachers/{uid} {
