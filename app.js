@@ -194,7 +194,7 @@ async function renderClasses(F,u){
   try{list=await F.listClasses()}catch(e){box.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
   list.sort((a,b)=>a.id.localeCompare(b.id,'ko',{numeric:true}));
   tcache={};list.forEach(c=>tcache[c.id]=c);
-  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button></div><div class="ctl"><span class="hint">닫힌 모둠:</span>${(c.closedGroups||[]).slice().sort((x,y)=>x-y).map(n=>`<button class="alt" data-a="gopen" data-n="${n}" aria-label="모둠 ${n} 열기">모둠 ${n} ✕</button>`).join('')||'<span class="hint">없음</span>'}</div><div class="ctl"><input type="number" class="gn" min="1" max="30" inputmode="numeric" placeholder="모둠 번호" aria-label="닫을 모둠 번호"><button class="alt" data-a="gclose">모둠 닫기</button></div><div class="ctl"><input type="number" class="gk" min="2" max="30" inputmode="numeric" placeholder="모둠 수" aria-label="만들 모둠 수"><button class="alt" data-a="gmake">모둠 만들기</button><button class="alt" data-a="gseq">번호순으로</button><button class="alt" data-a="gview">모둠 보기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
+  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button></div>${c.groupCount?`<div class="ctl"><span class="hint">모둠 수업:</span>${Array.from({length:c.groupCount},(_,i)=>i+1).map(n=>{const cl=(c.closedGroups||[]).includes(n);return `<button class="${cl?'alt':''}" data-a="gtog" data-n="${n}" aria-label="${n}모둠 ${cl?'수업 시작':'수업 마감'}">${n}모둠 ${cl?'시작':'● 진행중'}</button>`}).join('')}</div><div class="ctl"><button class="alt" data-a="gall">모두 시작</button><button class="alt" data-a="gnone">모두 마감</button><span class="hint">진행중인 모둠만 저장·제출할 수 있어요.</span></div>`:'<div class="ctl"><span class="hint">모둠을 만들면 모둠별 수업 시작 버튼이 나와요.</span></div>'}<div class="ctl"><label class="hint">전체 모둠 수 <input type="number" class="gk" min="2" max="30" inputmode="numeric" placeholder="예: 6" aria-label="만들 모둠 수" style="width:5.5em"></label><button class="alt" data-a="gmake">모둠 만들기</button><button class="alt" data-a="gseq">번호순으로</button><button class="alt" data-a="gview">모둠 보기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
   $('#lo').onclick=async()=>{await F.logout();teacherInit()};
   $('#mk').onclick=async()=>{const c=$('#nc').value.trim();
     if(!/^[A-Za-z0-9_-]{1,20}$/.test(c)){$('#tm').textContent='반 코드는 영문, 숫자, -, _ 만 1~20자로 적어 주세요.';return}
@@ -204,18 +204,18 @@ async function renderClasses(F,u){
     try{
       if(a==='toggle'){await F.setClass(c,{open:!d.open});renderClasses(F,u)}
       else if(a==='key'){if(confirm(c+'반의 QR을 새로 만들까요? 이전 QR은 쓸 수 없게 돼요.')){await F.setClass(c,{joinKey:F.newKey()});renderClasses(F,u)}}
-      else if(a==='gclose'){const n=parseInt(b.closest('.cls').querySelector('.gn').value,10);
-        if(!(n>=1&&n<=30)){$('#tv').innerHTML='<p>닫을 모둠 번호를 1~30 사이로 적어 주세요.</p>';return}
-        await F.setClass(c,{closedGroups:[...new Set([...(d.closedGroups||[]),n])].sort((x,y)=>x-y)});renderClasses(F,u)}
+      else if(a==='gtog'){const n=+b.dataset.n,cl=d.closedGroups||[];
+        await F.setClass(c,{closedGroups:cl.includes(n)?cl.filter(x=>x!==n):[...cl,n].sort((x,y)=>x-y)});renderClasses(F,u)}
+      else if(a==='gall'){await F.setClass(c,{closedGroups:[]});renderClasses(F,u)}
+      else if(a==='gnone'){await F.setClass(c,{closedGroups:Array.from({length:d.groupCount||0},(_,i)=>i+1)});renderClasses(F,u)}
       else if(a==='gmake'||a==='gseq'){const k=parseInt(b.closest('.cls').querySelector('.gk').value,10),n=d.studentCount||30;
         if(!(k>=2&&k<=30&&k<=n)){$('#tv').innerHTML='<p>모둠 수를 2~'+Math.min(30,n)+' 사이로 적어 주세요. (반 인원 '+n+'명 기준이에요. 인원은 작품 보기에서 바꿔요.)</p>';return}
         if(d.groupCount&&!confirm(c+'반의 모둠을 새로 만들까요? 지금의 모둠 편성은 바뀌어요.'))return;
         const ids=Array.from({length:n},(_,i)=>i+1),map={};
         if(a==='gmake'){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}ids.forEach((no,i)=>{map[no]=i%k+1})}
         else{const base=Math.floor(n/k),ex=n%k;let p=0;for(let g=1;g<=k;g++){const sz=base+(g<=ex?1:0);for(let t=0;t<sz;t++)map[ids[p++]]=g}}
-        const g={count:k,students:n,map};await F.setGroups(c,g);d.groupCount=k;showGroups(c,g)}
+        const g={count:k,students:n,map};await F.setGroups(c,g);await F.setClass(c,{closedGroups:Array.from({length:k},(_,i)=>i+1)});renderClasses(F,u);showGroups(c,g)}
       else if(a==='gview'){const g=await F.getGroups(c);if(!g){$('#tv').innerHTML='<p>아직 만든 모둠이 없어요. 모둠 수를 적고 `모둠 만들기`를 눌러 주세요.</p>';return}showGroups(c,g)}
-      else if(a==='gopen'){const n=+b.dataset.n;await F.setClass(c,{closedGroups:(d.closedGroups||[]).filter(x=>x!==n)});renderClasses(F,u)}
       else if(a==='qr')showQR(c,d);
       else if(a==='work')showWork(F,c,true)
     }catch(e){$('#tv').innerHTML='<p>'+errMsg(e,'t')+'</p>'}})}
