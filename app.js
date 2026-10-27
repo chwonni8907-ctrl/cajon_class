@@ -78,7 +78,7 @@ const TIPS={4:'숫자 아래에 칸이 한 칸씩 있어요. 한 박에 하나�
 let cur=[],sel='',drag=null,sz=4,fl=0;
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-function createHtml(){return `<div class="cbar"><select id="sz" aria-label="박자 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><select id="fi" aria-label="필인 고르기"><option value="0">필인 없음</option><option value="1">필인 있음</option></select><span></span></div><p id="tip"></p><div class="card"><div id="cg"></div><div class="ctl"><button id="pb">▶ 들어보기</button><label>빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label><button class="alt" id="clr">모두 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0">아이콘을 빈 칸으로 끌어다 놓아 보세요. 아이콘을 누른 뒤 칸을 눌러도 돼요. 같은 아이콘을 여러 번 쓸 수 있어요. 칸의 아이콘을 누르면 지워지고, 다른 칸으로 끌면 옮길 수 있어요.</p></div><h3>내 작품 내기</h3><div class="card" id="sv"></div>`}
+function createHtml(){return `<div class="cbar"><select id="sz" aria-label="박자 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><select id="fi" aria-label="필인 고르기"><option value="0">필인 없음</option><option value="1">필인 있음</option></select><span></span></div><p id="tip"></p><div class="card"><div id="cg"></div><div class="ctl"><button id="pb">▶ 들어보기</button><label>빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label><button class="alt" id="clr">모두 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0">아이콘을 빈 칸으로 끌어다 놓아 보세요. 아이콘을 누른 뒤 칸을 눌러도 돼요. 같은 아이콘을 여러 번 쓸 수 있어요. 칸의 아이콘을 누르면 지워지고, 다른 칸으로 끌면 옮길 수 있어요.</p></div><h3>작품 저장과 제출</h3><div class="card" id="sv"></div>`}
 function loadCur(){const v=lsGet('cajon-c'+sz);cur=Array.isArray(v)&&v.length===sz?v:Array(sz).fill('')}
 function save(){lsSet('cajon-c'+sz,cur)}
 function beep(t){ac=ac||new AC();ac.resume();snd(t[0])}
@@ -122,29 +122,46 @@ async function playCreate(){
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function fb(ms=8000){return window.FB?Promise.resolve(window.FB):new Promise((res,rej)=>{const t=setTimeout(()=>rej(Object.assign(new Error('load'),{code:'load'})),ms);addEventListener('fbready',()=>{clearTimeout(t);res(window.FB)},{once:true})})}
 function errMsg(e,who){const c=(e&&e.code)||'';
-  if(c==='permission-denied')return who==='t'?'권한이 없어요. 이 계정이 선생님(teachers)으로 등록되어 있는지 확인해 주세요.':'저장할 수 없어요. 수업이 닫혔거나 QR이 새로 바뀌었을 수 있어요. 선생님께 새 QR을 받아 다시 찍어 보세요.';
+  if(c==='permission-denied')return who==='t'?'권한이 없어요. 이 계정이 선생님(teachers)으로 등록되어 있는지 확인해 주세요.':'저장할 수 없어요. 우리 반이나 모둠이 닫혀 있거나 QR이 새로 바뀌었을 수 있어요. 선생님께 물어보세요.';
   if(c==='auth/operation-not-allowed')return '로그인 방법이 꺼져 있어요. Firebase의 Authentication에서 익명과 Google 로그인을 켜 주세요.';
   if(c==='auth/unauthorized-domain')return '이 주소가 Firebase의 승인된 도메인에 없어요. Authentication → 설정 → 승인된 도메인에 추가해 주세요.';
   if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return '로그인 창이 닫혔어요. 다시 눌러 주세요.';
   if(c==='auth/popup-blocked')return '팝업이 막혀 있어요. 주소창 오른쪽에서 팝업을 허용해 주세요.';
   if(c==='auth/api-key-not-valid.-please-pass-a-valid-api-key.'||c==='auth/invalid-api-key')return 'Firebase 설정값(apiKey)이 맞지 않아요. firebase.js의 값을 확인해 주세요.';
   if(c==='exists')return '이미 있는 반이에요.';
+  if(c==='submitted')return '이미 제출한 작품이에요. 고치려면 선생님께 제출을 풀어 달라고 말해요.';
   if(c==='unavailable'||c==='load'||c==='auth/network-request-failed')return '인터넷 연결을 확인하고 다시 시도해 주세요.';
   return '문제가 생겼어요: '+(c||(e&&e.message)||'알 수 없는 오류')}
 
 /* ----- 학생: 반·번호로 작품 내기 ----- */
 function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-join');
-  if(!j||!j.classCode){box.innerHTML='<p class="hint" style="margin:0">선생님이 보여 주는 QR 코드로 들어오면 작품을 저장해서 낼 수 있어요. 지금 만든 리듬은 이 기기에만 저장돼요.</p>';return}
-  const no=lsGet('cajon-no')||'';
-  box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b><label>번호 <input id="no" type="number" min="1" max="60" inputmode="numeric" value="${esc(no)}"></label><button id="sb">저장해서 내기</button><button class="alt" id="sx">반 바꾸기</button></div><p class="hint" id="smsg" style="margin-bottom:0">지금 보이는 ${sz}비트 리듬을 내요. 박자마다 따로 낼 수 있어요.</p>`;
-  $('#sx').onclick=()=>{try{localStorage.removeItem('cajon-join')}catch(e){}renderSave()};
-  $('#sb').onclick=async()=>{const m=$('#smsg'),v=parseInt($('#no').value,10);
-    if(!(v>=1&&v<=60)){m.textContent='번호를 1~60 사이로 적어 주세요.';return}
-    if(!cur.some(x=>x)){m.textContent='먼저 칸에 아이콘을 넣어 리듬을 만들어 주세요.';return}
-    lsSet('cajon-no',v);$('#sb').disabled=true;m.textContent='저장하는 중…';
-    try{const F=await fb();await F.saveCreation({classCode:j.classCode,no:v,joinKey:j.key,beats:sz,fill:(fl&&sz>4)?1:0,cells:cur.slice()});m.textContent='저장했어요! '+v+'번, '+sz+'비트 ('+new Date().toLocaleTimeString('ko-KR')+')'}
-    catch(e){m.textContent=errMsg(e)}
-    const b=$('#sb');if(b)b.disabled=false}}
+  if(!j||!j.classCode){box.innerHTML='<p class="hint" style="margin:0">선생님이 보여 주는 QR 코드로 들어오면 작품을 저장하고 제출할 수 있어요. 지금 만든 리듬은 이 기기에만 저장돼요.</p>';return}
+  let ty=lsGet('cajon-type')==='group'?'group':'solo';
+  const draw=()=>{const g=ty==='group',no=lsGet(g?'cajon-gno':'cajon-no')||'';
+    box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b><span class="seg" role="group" aria-label="내는 방법"><button class="seg-b${g?'':' on'}" data-t="solo">개인</button><button class="seg-b${g?' on':''}" data-t="group">모둠</button></span><label>${g?'모둠 번호':'번호'} <input id="no" type="number" min="1" max="${g?30:60}" inputmode="numeric" value="${esc(no)}"></label></div><div class="svrow"><button class="alt" id="sd">임시 저장</button><button id="sb">제출하기</button><button class="alt" id="sf">피드백 보기</button><button class="alt" id="sx">반 바꾸기</button></div><p class="hint" id="smsg" style="margin-bottom:0">${g?'모둠 작품은 모둠 번호마다 하나만 저장돼요. 같은 모둠 친구가 저장하면 그 작품에 덮어써지니, 저장하기 전에 모둠 친구와 확인해요. ':'지금 보이는 '+sz+'비트 리듬이에요. '}<b>제출하기</b>를 눌러야 선생님이 볼 수 있고, 제출하면 고칠 수 없어요.</p>`;
+    box.querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{ty=b.dataset.t;lsSet('cajon-type',ty);draw()});
+    $('#sx').onclick=()=>{try{localStorage.removeItem('cajon-join')}catch(e){}renderSave()};
+    const go=async submit=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60;
+      if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
+      if(!cur.some(x=>x)){m.textContent='먼저 칸에 아이콘을 넣어 리듬을 만들어 주세요.';return}
+      const who=(g?'모둠 '+v:v+'번')+', '+sz+'비트';
+      if(submit&&!confirm(who+' 작품을 제출할까요? 제출하면 고칠 수 없어요.'))return;
+      lsSet(g?'cajon-gno':'cajon-no',v);$('#sb').disabled=true;$('#sd').disabled=true;m.textContent=submit?'제출하는 중…':'저장하는 중…';
+      try{const F=await fb();await F.saveCreation({type:ty,classCode:j.classCode,no:v,joinKey:j.key,beats:sz,fill:(fl&&sz>4)?1:0,cells:cur.slice(),submit});
+        m.textContent=submit?'제출했어요! 선생님이 볼 수 있어요. ('+who+')':'임시 저장했어요. 아직 제출 전이에요. ('+who+', '+new Date().toLocaleTimeString('ko-KR')+')'}
+      catch(e){m.textContent=errMsg(e)}
+      const b1=$('#sb'),b2=$('#sd');if(b1)b1.disabled=false;if(b2)b2.disabled=false};
+    $('#sb').onclick=()=>go(true);$('#sd').onclick=()=>go(false);
+    $('#sf').onclick=async()=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60,sc=n=>n>0?n+'/5':'-';
+      if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
+      m.textContent='불러오는 중…';
+      try{const F=await fb();const w=await F.getMine({type:ty,classCode:j.classCode,no:v,beats:sz});
+        if(!w){m.textContent='이 번호로 저장한 '+sz+'비트 작품이 아직 없어요.';return}
+        const f=w.feedback;
+        if(!f){m.textContent='아직 선생님 피드백이 없어요. '+(w.submitted?'제출은 완료됐어요.':'아직 제출 전이에요.');return}
+        m.innerHTML='<b>선생님 피드백</b> · 박자 이해 '+sc(f.s1)+' · 창의성 '+sc(f.s2)+' · 표현 '+sc(f.s3)+(f.comment?'<br>'+esc(f.comment):'')}
+      catch(e){m.textContent=errMsg(e)}}};
+  draw()}
 
 /* ----- 선생님 화면 ----- */
 let tcache={};
@@ -165,7 +182,7 @@ async function renderClasses(F,u){
   try{list=await F.listClasses()}catch(e){box.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
   list.sort((a,b)=>a.id.localeCompare(b.id,'ko',{numeric:true}));
   tcache={};list.forEach(c=>tcache[c.id]=c);
-  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'닫기':'열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
+  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button></div><div class="ctl"><span class="hint">닫힌 모둠:</span>${(c.closedGroups||[]).slice().sort((x,y)=>x-y).map(n=>`<button class="alt" data-a="gopen" data-n="${n}" aria-label="모둠 ${n} 열기">모둠 ${n} ✕</button>`).join('')||'<span class="hint">없음</span>'}</div><div class="ctl"><input type="number" class="gn" min="1" max="30" inputmode="numeric" placeholder="모둠 번호" aria-label="닫을 모둠 번호"><button class="alt" data-a="gclose">모둠 닫기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
   $('#lo').onclick=async()=>{await F.logout();teacherInit()};
   $('#mk').onclick=async()=>{const c=$('#nc').value.trim();
     if(!/^[A-Za-z0-9_-]{1,20}$/.test(c)){$('#tm').textContent='반 코드는 영문, 숫자, -, _ 만 1~20자로 적어 주세요.';return}
@@ -175,8 +192,12 @@ async function renderClasses(F,u){
     try{
       if(a==='toggle'){await F.setClass(c,{open:!d.open});renderClasses(F,u)}
       else if(a==='key'){if(confirm(c+'반의 QR을 새로 만들까요? 이전 QR은 쓸 수 없게 돼요.')){await F.setClass(c,{joinKey:F.newKey()});renderClasses(F,u)}}
+      else if(a==='gclose'){const n=parseInt(b.closest('.cls').querySelector('.gn').value,10);
+        if(!(n>=1&&n<=30)){$('#tv').innerHTML='<p>닫을 모둠 번호를 1~30 사이로 적어 주세요.</p>';return}
+        await F.setClass(c,{closedGroups:[...new Set([...(d.closedGroups||[]),n])].sort((x,y)=>x-y)});renderClasses(F,u)}
+      else if(a==='gopen'){const n=+b.dataset.n;await F.setClass(c,{closedGroups:(d.closedGroups||[]).filter(x=>x!==n)});renderClasses(F,u)}
       else if(a==='qr')showQR(c,d);
-      else if(a==='work')showWork(F,c)
+      else if(a==='work')showWork(F,c,true)
     }catch(e){$('#tv').innerHTML='<p>'+errMsg(e,'t')+'</p>'}})}
 async function showQR(c,d){const tv=$('#tv'),url=location.origin+location.pathname+'?class='+encodeURIComponent(c)+'&key='+encodeURIComponent(d.joinKey);
   tv.innerHTML=`<h3>${esc(c)}반 QR</h3><div class="card" style="text-align:center"><div id="qr" class="qrbox"></div><p class="hint" style="word-break:break-all">${esc(url)}</p><div class="ctl" style="justify-content:center"><button class="alt" id="cp">주소 복사</button></div>${d.open?'':'<p class="hint">이 반은 지금 닫혀 있어서 학생이 저장할 수 없어요.</p>'}</div>`;
@@ -188,15 +209,46 @@ function miniGrid(w){const L=LB[w.beats],gap=w.beats/4,per=Math.min(w.beats,8),u
     for(let i=r;i<r+per;i++){const t=TK.includes(w.cells[i])?w.cells[i]:'',fi=useFill&&i>=w.beats*3/4;h+=`<div class="cc${i%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[i]}</div><div class="slot${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`}
     h+='</div>'}
   return h}
-async function showWork(F,c){const tv=$('#tv');tv.innerHTML='<p class="hint">불러오는 중…</p>';
-  let list;try{list=await F.listCreations(c)}catch(e){tv.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
-  list=list.filter(w=>[4,8,16].includes(w.beats)&&Array.isArray(w.cells)&&w.cells.length===w.beats);
-  list.sort((a,b)=>a.no-b.no||a.beats-b.beats);
-  tv.innerHTML=`<h3>${esc(c)}반 작품 (${list.length}개)</h3>`+(list.length?list.map(w=>`<div class="card wk" data-id="${esc(w.id)}"><div class="ctl"><b>${esc(w.no)}번</b><span class="hint">${w.beats}비트${w.fill&&w.beats>4?' · 필인':''}${w.updatedAt&&w.updatedAt.toDate?' · '+w.updatedAt.toDate().toLocaleString('ko-KR'):''}</span></div>${miniGrid(w)}<div class="ctl"><button data-p="1">▶ 들어보기</button><button class="alt" data-x="1">삭제</button></div></div>`).join(''):'<p class="hint">아직 낸 작품이 없어요.</p>');
-  tv.querySelectorAll('.wk').forEach(card=>{const w=list.find(x=>x.id===card.dataset.id);
-    card.querySelector('[data-p]').onclick=()=>playCells(card,w.cells,w.beats);
-    card.querySelector('[data-x]').onclick=async()=>{if(!confirm(w.no+'번 작품을 삭제할까요?'))return;try{await F.deleteCreation(w.id);showWork(F,c)}catch(e){alert(errMsg(e,'t'))}}});
-  tv.scrollIntoView({behavior:'smooth'})}
+let wf='sub';
+const SCN=[['s1','박자 이해'],['s2','창의성'],['s3','표현']];
+const tmS=t=>t&&t.toDate?t.toDate().toLocaleString('ko-KR'):'';
+function qv(v){let t=String(v==null?'':v);if(/^[=+\-@]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'}
+function dl(name,text){const b=new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function rosterN(all,d){return d.studentCount||Math.max(30,...all.filter(w=>w.type==='solo').map(w=>w.no))}
+function board(all,d){
+  const solo=all.filter(w=>w.type==='solo'),grp=all.filter(w=>w.type==='group'),n=rosterN(all,d),closed=d.closedGroups||[];
+  const stOf=arr=>arr.some(w=>w.submitted===true)?'s':(arr.length?'d':'n'),mark={s:'✓',d:'●',n:'○'},txt={s:'제출',d:'작성 중',n:'안 냄'};
+  const miss=[];let h='';
+  for(let i=1;i<=n;i++){const st=stOf(solo.filter(w=>w.no===i));if(st!=='s')miss.push(i);h+=`<span class="bd ${st}" aria-label="${i}번 ${txt[st]}">${i}<small>${mark[st]}</small></span>`}
+  const gn=[...new Set([...grp.map(w=>w.no),...closed])].sort((a,b)=>a-b);
+  const gh=gn.map(i=>{const st=stOf(grp.filter(w=>w.no===i));return `<span class="bd g ${st}" aria-label="모둠 ${i} ${txt[st]}">모둠 ${i}<small>${mark[st]}${closed.includes(i)?' 닫힘':''}</small></span>`}).join('');
+  return `<div class="card"><div class="ctl"><b>제출 현황 (개인)</b><span class="hint">제출 ${n-miss.length} / ${n}</span><label class="hint">반 인원 <input id="cn" type="number" min="1" max="60" value="${n}" style="width:5em"></label><button class="alt" id="cs">적용</button></div><div>${h}</div>${miss.length?`<p class="hint">아직 안 낸 번호: ${miss.join(', ')}</p>`:'<p class="hint">모두 제출했어요!</p>'}${gn.length?`<div class="ctl"><b>모둠</b></div><div>${gh}</div>`:''}<p class="hint" style="margin-bottom:0">✓ 제출 · ● 작성 중 · ○ 아직 안 냄 (4·8·16비트 중 하나라도 제출하면 ✓)</p></div>`}
+function csvOf(all,d,c){
+  const rows=[['반','구분','번호','박자','필인','상태','제출시각','마지막 저장','박자 이해','창의성','표현','코멘트','리듬']];
+  [...all].sort((a,b)=>(a.type===b.type?0:a.type==='group'?-1:1)||a.no-b.no||a.beats-b.beats).forEach(w=>{const f=w.feedback||{};
+    rows.push([c,w.type==='group'?'모둠':'개인',w.no,w.beats+'비트',w.fill&&w.beats>4?'있음':'없음',w.submitted===true?'제출':'작성 중',tmS(w.submittedAt),tmS(w.updatedAt),f.s1||'',f.s2||'',f.s3||'',f.comment||'',w.cells.map(x=>x||'-').join(' ')])});
+  const have=new Set(all.filter(w=>w.type==='solo').map(w=>w.no)),n=rosterN(all,d);
+  for(let i=1;i<=n;i++)if(!have.has(i))rows.push([c,'개인',i,'','','안 냄','','','','','','','']);
+  return rows.map(r=>r.map(qv).join(',')).join('\r\n')}
+async function showWork(F,c,scroll){const tv=$('#tv');tv.innerHTML='<p class="hint">불러오는 중…</p>';
+  let all;try{all=await F.listCreations(c)}catch(e){tv.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
+  all=all.filter(w=>['solo','group'].includes(w.type)&&[4,8,16].includes(w.beats)&&Array.isArray(w.cells)&&w.cells.length===w.beats);
+  const d=tcache[c]||{},subN=all.filter(w=>w.submitted===true).length,list=wf==='sub'?all.filter(w=>w.submitted===true):all;
+  const srt=(a,b)=>a.no-b.no||a.beats-b.beats,gs=list.filter(w=>w.type==='group').sort(srt),ss=list.filter(w=>w.type==='solo').sort(srt);
+  const opts=v=>'<option value="0">-</option>'+[1,2,3,4,5].map(n=>`<option value="${n}"${+v===n?' selected':''}>${n}</option>`).join('');
+  const card=w=>{const sb=w.submitted===true,f=w.feedback||{};return `<div class="card wk" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b><span class="badge${sb?' on':''}">${sb?'제출함':'작성 중'}</span><span class="hint">${w.beats}비트${w.fill&&w.beats>4?' · 필인':''}${sb?(tmS(w.submittedAt)?' · 제출 '+tmS(w.submittedAt):''):(tmS(w.updatedAt)?' · 저장 '+tmS(w.updatedAt):'')}</span></div>${miniGrid(w)}<div class="ctl"><button data-p="1">▶ 들어보기</button>${sb?'<button class="alt" data-r="1">제출 풀기</button>':''}<button class="alt" data-x="1">삭제</button></div><details class="fbx"${w.feedback?' open':''}><summary>점수와 코멘트${w.feedback?' (입력함)':''}</summary><div class="fbg">${SCN.map(([k,nm])=>`<label>${nm} <select data-s="${k}">${opts(f[k])}</select></label>`).join('')}<label class="cm">코멘트 <textarea data-c rows="2" maxlength="300">${esc(f.comment||'')}</textarea></label><div class="ctl"><button data-fs="1">저장</button><span class="hint" data-fst></span></div></div></details></div>`};
+  tv.innerHTML=`<h3>${esc(c)}반 작품</h3>`+board(all,d)+`<div class="ctl"><button class="alt" id="csv">엑셀(CSV)로 내려받기</button></div><div class="ctl"><span class="seg" role="group" aria-label="보기 방법"><button class="seg-b${wf==='sub'?' on':''}" data-f="sub">제출한 작품 (${subN})</button><button class="seg-b${wf==='all'?' on':''}" data-f="all">작성 중 포함 전체 (${all.length})</button></span></div>`+(list.length?(gs.length?`<h4 class="sec">모둠 작품 (${gs.length}개)</h4>`+gs.map(card).join(''):'')+(ss.length?`<h4 class="sec">개인 작품 (${ss.length}개)</h4>`+ss.map(card).join(''):''):`<p class="hint">${wf==='sub'?'아직 제출한 작품이 없어요.':'아직 저장된 작품이 없어요.'}</p>`);
+  $('#cs').onclick=async()=>{const v=parseInt($('#cn').value,10);if(!(v>=1&&v<=60))return;try{await F.setClass(c,{studentCount:v});if(tcache[c])tcache[c].studentCount=v;showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
+  $('#csv').onclick=()=>dl(c+'반_카혼작품_'+new Date().toISOString().slice(0,10)+'.csv',csvOf(all,d,c));
+  tv.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{wf=b.dataset.f;showWork(F,c)});
+  tv.querySelectorAll('.wk').forEach(el=>{const w=list.find(x=>x.id===el.dataset.id),nm=w.type==='group'?'모둠 '+w.no:w.no+'번';
+    el.querySelector('[data-p]').onclick=()=>playCells(el,w.cells,w.beats);
+    const r=el.querySelector('[data-r]');if(r)r.onclick=async()=>{if(!confirm(nm+' 제출을 풀까요? 학생이 다시 고칠 수 있게 돼요.'))return;try{await F.reopen(w.id);showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
+    el.querySelector('[data-x]').onclick=async()=>{if(!confirm(nm+' 작품을 삭제할까요?'))return;try{await F.deleteCreation(w.id);showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
+    el.querySelector('[data-fs]').onclick=async()=>{const st=el.querySelector('[data-fst]'),v={comment:el.querySelector('[data-c]').value.trim().slice(0,300)};
+      SCN.forEach(([k])=>{v[k]=+el.querySelector('[data-s="'+k+'"]').value||0});
+      try{await F.setFeedback(w.id,v);w.feedback=v;st.textContent='저장했어요 ✓'}catch(e){st.textContent=errMsg(e,'t')}}});
+  if(scroll)tv.scrollIntoView({behavior:'smooth'})}
 async function playCells(card,cells,beats){
   const same=card.classList.contains('playing');
   stopPlay();document.querySelectorAll('.wk.playing').forEach(x=>x.classList.remove('playing'));

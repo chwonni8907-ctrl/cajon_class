@@ -19,40 +19,62 @@ service cloud.firestore {
     }
 
     function validCreation(d) {
-      return d.keys().hasOnly(['uid', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'createdAt', 'updatedAt'])
-        && d.keys().hasAll(['uid', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['uid', 'type', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'submitted', 'submittedAt', 'feedback', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['uid', 'type', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'submitted', 'submittedAt', 'createdAt', 'updatedAt'])
         && d.uid == request.auth.uid
         && d.classCode is string
         && d.classCode.size() >= 1
         && d.classCode.size() <= 20
         && d.classCode.matches('^[A-Za-z0-9_-]+$')
+        && d.type in ['solo', 'group']
         && d.no is int
         && d.no >= 1
-        && d.no <= 60
+        && ((d.type == 'solo' && d.no <= 60) || (d.type == 'group' && d.no <= 30))
         && d.joinKey is string
         && classDoc(d.classCode).open == true
         && classDoc(d.classCode).joinKey == d.joinKey
+        && !(d.type == 'group' && d.no in classDoc(d.classCode).get('closedGroups', []))
         && d.beats in [4, 8, 16]
         && d.fill in [0, 1]
         && d.cells is list
-        && d.cells.size() == d.beats;
+        && d.cells.size() == d.beats
+        && d.submitted is bool
+        && ((d.submitted == false && d.submittedAt == null) || (d.submitted == true && d.submittedAt == request.time));
     }
 
     match /creations/{creationId} {
-      allow get: if signedIn() && (resource == null || resource.data.uid == request.auth.uid || isTeacher());
+      allow get: if signedIn() && (resource == null || resource.data.uid == request.auth.uid || resource.data.type == 'group' || isTeacher());
       allow list: if isOwner(resource.data) || isTeacher();
 
       allow create: if signedIn()
         && validCreation(request.resource.data)
+        && !('feedback' in request.resource.data)
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
 
-      allow update: if isOwner(resource.data)
-        && validCreation(request.resource.data)
-        && request.resource.data.classCode == resource.data.classCode
-        && request.resource.data.no == resource.data.no
-        && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.updatedAt == request.time;
+      allow update: if (
+          (isOwner(resource.data) || resource.data.type == 'group')
+          && resource.data.get('submitted', false) == false
+          && validCreation(request.resource.data)
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.classCode == resource.data.classCode
+          && request.resource.data.no == resource.data.no
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.get('feedback', null) == resource.data.get('feedback', null)
+        ) || (
+          isTeacher()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['submitted', 'submittedAt'])
+          && request.resource.data.submitted == false
+          && request.resource.data.submittedAt == null
+        ) || (
+          isTeacher()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback'])
+          && request.resource.data.feedback is map
+          && request.resource.data.feedback.keys().hasOnly(['s1', 's2', 's3', 'comment'])
+          && request.resource.data.feedback.comment is string
+          && request.resource.data.feedback.comment.size() <= 300
+        );
 
       allow delete: if isOwner(resource.data) || isTeacher();
     }

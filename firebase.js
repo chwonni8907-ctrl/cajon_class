@@ -54,17 +54,28 @@ window.FB = {
     return s.exists();
   },
 
-  // ----- 학생: 작품 저장 (같은 기기·반·번호·박자는 한 문서를 덮어써요) -----
-  async saveCreation({ classCode, no, joinKey, beats, fill, cells }) {
+  // ----- 학생: 작품 저장 -----
+  // 개인(solo): 같은 기기·반·번호·박자는 한 문서를 덮어써요.
+  // 모둠(group): 같은 반·모둠 번호·박자는 한 문서를 모둠 친구들이 함께 덮어써요.
+  async saveCreation({ type, classCode, no, joinKey, beats, fill, cells, submit }) {
     const u = await ensureSignedIn();
-    const ref = doc(db, "creations", `${u.uid}_${classCode}_${no}_${beats}`);
+    const id = type === "group"
+      ? `${classCode}_g${no}_${beats}`
+      : `${u.uid}_${classCode}_s${no}_${beats}`;
+    const ref = doc(db, "creations", id);
     const snap = await getDoc(ref);
+    const sub = submit
+      ? { submitted: true, submittedAt: serverTimestamp() }
+      : { submitted: false, submittedAt: null };
     if (snap.exists()) {
-      await updateDoc(ref, { joinKey, fill, cells, updatedAt: serverTimestamp() });
+      if (snap.data().submitted === true) {
+        throw Object.assign(new Error("submitted"), { code: "submitted" });
+      }
+      await updateDoc(ref, { uid: u.uid, joinKey, fill, cells, updatedAt: serverTimestamp(), ...sub });
     } else {
       await setDoc(ref, {
-        uid: u.uid, classCode, no, joinKey, beats, fill, cells,
-        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        uid: u.uid, type, classCode, no, joinKey, beats, fill, cells,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...sub
       });
     }
   },
@@ -86,7 +97,17 @@ window.FB = {
     const s = await getDocs(query(collection(db, "creations"), where("classCode", "==", code)));
     return s.docs.map(d => ({ id: d.id, ...d.data() }));
   },
-  deleteCreation(id) { return deleteDoc(doc(db, "creations", id)); }
+  deleteCreation(id) { return deleteDoc(doc(db, "creations", id)); },
+  setFeedback(id, feedback) { return updateDoc(doc(db, "creations", id), { feedback }); },
+  async getMine({ type, classCode, no, beats }) {
+    const u = await ensureSignedIn();
+    const id = type === "group"
+      ? `${classCode}_g${no}_${beats}`
+      : `${u.uid}_${classCode}_s${no}_${beats}`;
+    const snap = await getDoc(doc(db, "creations", id));
+    return snap.exists() ? snap.data() : null;
+  },
+  reopen(id) { return updateDoc(doc(db, "creations", id), { submitted: false, submittedAt: null }); }
 };
 
 window.dispatchEvent(new Event("fbready"));
