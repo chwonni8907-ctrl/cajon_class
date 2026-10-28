@@ -30,7 +30,12 @@ const TREE={id:'home',t:'즐거운 카혼수업',c:[
 
 function find(id,n=TREE,path=[]){if(n.id===id)return[...path,n];for(const c of n.c||[]){const r=find(id,c,[...path,n]);if(r)return r}return null}
 const $=s=>document.querySelector(s);
-let ac,timer=null;
+let ac,timer=null,hi=0,lastId=null;
+const curId=()=>location.hash.replace('#/','')||'home';
+const hashOf=id=>'#/'+(id==='home'?'':id);
+function parentOf(id){if(id==='home')return null;const p=find(id);return p&&p.length>1?p[p.length-2].id:'home'}
+function goBack(){const id=curId(),par=parentOf(id);if(par===null)return;
+  if(hi>0)history.back();else{try{history.replaceState({i:0},'',hashOf(par))}catch(e){}route()}}
 
 
 function padSection(){return `<h3>카혼 두드려 보기</h3><div class="card"><p class="hint" style="margin-top:0">화면의 카혼을 직접 두드려 보세요. 먼저 여기서 연습하고, 실제 카혼으로 연주해 보세요. 리듬을 ‘들어보기’ 하면 칠 자리가 깜빡여요.</p><svg class="pad" viewBox="0 0 220 200" role="group" aria-label="두드릴 수 있는 카혼"><rect x="30" y="20" width="160" height="160" rx="6" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><rect x="38" y="28" width="144" height="144" rx="3" fill="#e8bb7c" stroke="#7a4a17"/><rect x="34" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="160" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="26" y="180" width="168" height="16" rx="3" fill="#a9772e" stroke="#7a4a17" stroke-width="2"/><text x="110" y="192" text-anchor="middle" style="font-size:10px;fill:#fff;pointer-events:none">앉는 면 (연주자 쪽)</text><g class="z" data-k="B" tabindex="0" role="button" aria-label="베이스"><circle class="zs" cx="110" cy="84" r="26"/><text x="110" y="88" text-anchor="middle">베이스</text></g><g class="z" data-k="HL" tabindex="0" role="button" aria-label="슬랩 왼손"><rect class="zs" x="70" y="134" width="34" height="34"/><text x="87" y="154" text-anchor="middle" style="font-size:10px">슬랩</text><text x="87" y="164" text-anchor="middle" style="font-size:8px">L</text></g><g class="z" data-k="HR" tabindex="0" role="button" aria-label="슬랩 오른손"><rect class="zs" x="116" y="134" width="34" height="34"/><text x="133" y="154" text-anchor="middle" style="font-size:10px">슬랩</text><text x="133" y="164" text-anchor="middle" style="font-size:8px">R</text></g><g class="z" data-k="TL" tabindex="0" role="button" aria-label="핑거 왼손"><polygon class="zs" points="54,135 70,151 54,167 38,151"/><text x="54" y="151" text-anchor="middle" style="font-size:9px">핑거</text><text x="54" y="160" text-anchor="middle" style="font-size:8px">L</text></g><g class="z" data-k="TR" tabindex="0" role="button" aria-label="핑거 오른손"><polygon class="zs" points="166,135 182,151 166,167 150,151"/><text x="166" y="151" text-anchor="middle" style="font-size:9px">핑거</text><text x="166" y="160" text-anchor="middle" style="font-size:8px">R</text></g></svg><p class="hint" style="margin-bottom:0">연주자가 앉아서 내려다본 방향의 그림이에요. 그림 아래쪽이 연주자 쪽(앉는 면)이에요. 빨강 원은 베이스, 파랑 네모는 슬랩(세게), 노랑 다이아몬드는 핑거(약하게)예요.</p></div>`}
@@ -204,7 +209,7 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
 
 /* ----- 선생님 화면 ----- */
 let tcache={};
-function shell(title,inner){return `<header><button class="hb" onclick="location.hash='#/'">← 처음으로</button><div class="t">${title}</div><button class="hb go" id="go">바로가기</button></header><main>${inner}</main>`}
+function shell(title,inner){return `<header><button class="hb" onclick="goBack()">← 뒤로</button><div class="t">${title}</div><button class="hb go" id="go">바로가기</button></header><main>${inner}</main>`}
 function loadQR(){return window.QRCode?Promise.resolve():new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=res;s.onerror=()=>rej(new Error('qr'));document.head.appendChild(s)})}
 async function teacherInit(){
   const box=$('#tp');box.innerHTML='<p class="hint">불러오는 중…</p>';
@@ -331,15 +336,15 @@ async function playCells(card,cells,beats){
 
 function route(){
   stopPlay();$('#menu').classList.remove('open');
-  const id=(location.hash.replace('#/','')||'home');
+  const id=(location.hash.replace('#/','')||'home');lastId=id;
   if(id==='teacher'){$('#app').innerHTML=shell('선생님 전용','<h2>선생님 전용</h2><div id="tp"></div>');
     $('#panel').innerHTML='<h4>메뉴</h4><ul><li><a href="#/">처음으로</a></li></ul>'+menuHtml(TREE,'')+'<ul><li><a href="#/teacher" class="cur">선생님 전용</a></li></ul>';
     $('#go').onclick=()=>$('#menu').classList.add('open');window.scrollTo(0,0);teacherInit();return}
   const path=find(id)||find('home'),n=path[path.length-1],par=path[path.length-2];
   let h='';
-  if(n.id==='home'){h=`<main class="home"><button class="title" id="ttl">즐거운 카혼수업</button><p class="hint" id="hint">글자를 눌러 보세요</p><p class="hint" style="font-size:.7rem;opacity:.6">버전 1028-b</p><div class="btns" id="hb" style="display:none;width:min(100%,360px)">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}<small>${c.d}</small></a>`).join('')}</div><a class="tl" href="#/teacher">선생님 전용</a></main>`;
+  if(n.id==='home'){h=`<main class="home"><button class="title" id="ttl">즐거운 카혼수업</button><p class="hint" id="hint">글자를 눌러 보세요</p><p class="hint" style="font-size:.7rem;opacity:.6">버전 1028-c</p><div class="btns" id="hb" style="display:none;width:min(100%,360px)">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}<small>${c.d}</small></a>`).join('')}</div><a class="tl" href="#/teacher">선생님 전용</a></main>`;
   }else{
-    h=`<header><button class="hb" onclick="location.hash='#/${par.id==='home'?'':par.id}'">← 뒤로</button><div class="t">${n.t}</div><button class="hb go" id="go">바로가기</button></header><main>`;
+    h=`<header><button class="hb" onclick="goBack()">← 뒤로</button><div class="t">${n.t}</div><button class="hb go" id="go">바로가기</button></header><main>`;
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
@@ -354,4 +359,17 @@ function route(){
   window.scrollTo(0,0);
 }
 $('#menu').onclick=e=>{if(e.target.id==='menu'||e.target.tagName==='A')$('#menu').classList.remove('open')};
-addEventListener('hashchange',route);route();
+
+/* ----- 뒤로가기: 어느 길로 들어와도 한 단계 위 페이지로 가요 (메뉴 구조: 처음 > 이론/연주/창작 > 하위 페이지) ----- */
+function nav(){const id=curId(),st=history.state;
+  if(!st||typeof st.i!=='number'){hi++;try{history.replaceState({i:hi},'')}catch(e){}}
+  else{const back=st.i<hi;hi=st.i;
+    if(back&&lastId!==null){const par=parentOf(lastId);if(par!==null&&id!==par){try{history.replaceState({i:hi},'',hashOf(par))}catch(e){}}}}
+  route()}
+addEventListener('popstate',nav);
+(function init(){const id=curId(),st=history.state;
+  if(st&&typeof st.i==='number'){hi=st.i}
+  else{const ch=id==='home'?[]:(find(id)||[]).slice(1).map(n=>n.id);if(id!=='home'&&!find(id))ch.push(id);
+    try{history.replaceState({i:0},'',hashOf('home'));ch.forEach((x,k)=>history.pushState({i:k+1},'',hashOf(x)))}catch(e){}
+    hi=ch.length}
+  route()})();
