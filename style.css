@@ -138,3 +138,5 @@ ul.boxed{background:var(--card);border:1px solid var(--line);border-radius:12px;
 .ctl button.pbx.alt{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:5px 10px;font-weight:600}
 .mh{font-weight:700;color:var(--mute);margin:8px 0 2px;font-size:.9rem}
 .ttl{margin-bottom:8px}.ttl label{display:flex;gap:8px;align-items:center;font-weight:600}.ttl input{flex:1}
+
+.fig img.photo{display:block;width:100%;max-width:560px;height:auto;margin:0 auto;border-radius:14px;background:#fff}
