@@ -30,7 +30,7 @@ const TREE={id:'home',t:'즐거운 카혼수업',c:[
 
 function find(id,n=TREE,path=[]){if(n.id===id)return[...path,n];for(const c of n.c||[]){const r=find(id,c,[...path,n]);if(r)return r}return null}
 const $=s=>document.querySelector(s);
-let ac,timer=null,hi=0,lastId=null;
+let ac,timer=null,hi=0,lastId=null,menuShown=false;try{menuShown=sessionStorage.getItem('cajon-menu')==='1'}catch(e){}
 const curId=()=>location.hash.replace('#/','')||'home';
 const hashOf=id=>'#/'+(id==='home'?'':id);
 function parentOf(id){if(id==='home')return null;const p=find(id);return p&&p.length>1?p[p.length-2].id:'home'}
@@ -85,7 +85,7 @@ function body(n){
   if(n.k==='origin')h+=`<figure class="fig">${ART.origin()}</figure>`+para(['에스파냐어로 상자, 서랍이라는 뜻의 카혼(Cajón)은 16세기부터 19세기 말 사이에 남아메리카에 노예로 끌려간 아프리카 사람들이 주변에서 흔히 구할 수 있는 나무 상자를 악기 삼아 두드려 연주한 것이 그 기원이 된 타악기로, 외형은 보통 육면체에 사운드홀이 뚫려 있는 형태이다.','페루 리마(Lima)를 중심으로 발생한 직육면체 모양의 페루 카혼과 쿠바의 아바나(Habana)를 중심으로 발생한 다양한 형태의 쿠바 카혼이 있다.','쿠바 카혼이 여전히 쿠바 내에서 주로 사용되고 있는 반면, 페루 카혼은 플라멩코 뮤지션 파코 데 루시아의 밴드에서 페루 카혼을 사용하면서 전 세계에 널리 알려졌다.','쿠바 카혼에 비해 페루 카혼이 훨씬 대중화되어 있기 때문에 오늘날 ‘카혼’이라고 하면 일반적으로 페루 카혼을 의미한다. 페루 카혼은 라틴아메리카 음악 외에도 다양한 대중음악 장르에서 널리 사용되고 있으며, 구조가 비교적 단순해 연주자가 직접 악기를 만들어 사용하는 경우도 많다.'])+'<p class="hint">출처: 악기백과</p>';
   else if(n.k==='posture')h+=`<figure class="fig"><img class="photo" src="${IMG.posture}" alt="카혼 연주 자세(앞모습과 옆모습)" width="569" height="401"></figure>`+para(['카혼을 연주할 때는 악기 위에 앉아서 악기의 앞면을 두드려야 하기 때문에 연주 자세가 바르지 않으면 자칫 허리 통증이 발생할 수 있다. 따라서 약간 뒤쪽으로 물러나 허리를 편안하게 펴고 앉는다. 이때 앞판이 두 다리 사이에 와야 한다. 허리를 지나치게 구부리거나 너무 아래쪽까지 손을 뻗는 자세는 통증을 유발할 수 있기 때문에 허리를 많이 굽혀야 할 정도로 낮은 지점은 치지 않는다. 허리에 무리가 가지 않도록 몸을 뒤쪽으로 기울이고 카혼의 앞부분이 살짝 들리게 앉아 연주하는 방법도 있다.']);
   else if(n.k==='structure')h+=`<figure class="fig">${ART.structure()}</figure><figure class="fig fig-s">${ART.snare()}</figure><ul class="pts boxed"><li><b>앉는 면</b>: 위쪽 판. 연주자가 앉는 곳이에요.</li><li><b>타격면</b>: 앞쪽 얇은 판. 손으로 쳐서 소리를 내요.</li><li><b>몸통</b>: 소리가 울리는 나무 상자예요.</li><li><b>스네어</b>: 몸통 안쪽에 있는 울림 줄이에요. 슬랩을 칠 때 ‘차르륵’ 하는 소리를 더해 줘요.</li><li><b>사운드 홀</b>: 뒷면의 구멍이에요. 소리가 이곳으로 퍼져 나와요.</li><li><b>고무 발</b>: 바닥에서 미끄러지지 않게 받쳐 줘요.</li></ul>`;
-  else if(n.k==='sym')h+=`<h3>기호와 연주법</h3><div class="card"><div><span class="chip">${SYM('B','R')}<span><b>베이스(Bass tap)</b>: 앞판 중앙에 가까운 지점을 쳐 낮고 깊은 소리를 내는 것</span></span></div><div><span class="chip">${SYM('H','R')}<span><b>슬랩(Slap tap)</b>: 카혼 특유의 날카로운 소리를 내는 것</span></span></div><div><span class="chip">${SYM('T','R')}<span><b>핑거(Finger tap)</b>: 손 끝으로 앞판의 윗부분을 두드려 소리를 내는 것. 고스트라고도 함.</span></span></div></div><figure class="fig"><img class="photo" src="${IMG.symbols}" alt="카혼 앞면과 손 모양, 고스트(치)·클랩(짝)·슬랩(따)·베이스(쿵) 연주법" width="218" height="175" style="max-width:360px"></figure><h3>손 표시</h3><ul class="pts boxed"><li>기호 안의 글자가 손이에요. <b>R</b>은 오른손, <b>L</b>은 왼손이에요.</li><li>기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.</li></ul><h3>읽는 방법</h3><div class="card"><div class="bt">예시</div>${gridOne({beats:4},{p:'BR BL HR TL BR BL HR TL'})}</div>`;
+  else if(n.k==='sym')h+=`<h3>기호와 연주법</h3><div class="card"><div><span class="chip">${SYM('B','R')}<span><b>베이스(Bass tap)</b>: 앞판 중앙에 가까운 지점을 쳐 낮고 깊은 소리를 내는 것</span></span></div><div><span class="chip">${SYM('H','R')}<span><b>슬랩(Slap tap)</b>: 카혼 특유의 날카로운 소리를 내는 것</span></span></div><div><span class="chip">${SYM('T','R')}<span><b>핑거(Finger tap)</b>: 손 끝으로 앞판의 윗부분을 두드려 소리를 내는 것. 고스트라고도 함.</span></span></div></div><figure class="fig"><img class="photo" src="${IMG.symbols}" alt="카혼 앞면과 손 모양, 고스트(치)·클랩(짝)·슬랩(따)·베이스(쿵) 연주법" width="1000" height="747" style="max-width:560px"></figure><h3>손 표시</h3><ul class="pts boxed"><li>기호 안의 글자가 손이에요. <b>R</b>은 오른손, <b>L</b>은 왼손이에요.</li><li>기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.</li></ul><h3>읽는 방법</h3><div class="card"><div class="bt">예시</div>${gridOne({beats:4},{p:'BR BL HR TL BR BL HR TL'})}</div>`;
   else if(n.k==='song'){
     const bars=SONG.map((p,i)=>({t:'마디 '+(i+1),p,beats:4}));n.bars=bars;
     h+=`<div class="songhead"><b>흔들리는 꽃들 속에서 네 샴푸향이 느껴진거야</b><span class="hint">장범준</span></div>${['practice-score','practice-score-1','practice-score-2','practice-score-3','practice-score-4'].map((f,i)=>`<img class="score" src="images/${f}.png" alt="연습곡 악보" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='images/${f}.jpg'}else if(this.dataset.t==1){this.dataset.t=2;this.src='images/${f}.jpeg'}else{this.remove()}">`).join('')}${video(n.id)}<h3>카혼 리듬</h3><div class="card"><div class="ctl"><button class="pbx" data-bi="all" data-t="▶ 처음부터 끝까지 들어보기">▶ 처음부터 끝까지 들어보기</button>${BPMSL}</div><div class="songgrid">`+bars.map((b,i)=>`<div class="bar"><div class="bt">${b.t}</div>${gridOne(n,b)}<div class="ctl"><button class="pbx alt" data-bi="${i}">▶ 이 마디</button></div></div>`).join('')+`</div></div>`;
@@ -347,10 +347,12 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1028-e</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1028-g</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
-  const t=$('#ttl');if(t)t.onclick=()=>{$('#hb').style.display='grid';$('#hint').style.display='none'};
+  const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};
+  if(n.id!=='home'){menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}}
+  const t=$('#ttl');if(t){t.onclick=showMenu;if(menuShown)showMenu()}
   const pb=$('#pb');if(pb&&n.k==='create')pb.onclick=()=>playCreate(n);
   document.querySelectorAll('.pbx').forEach(b=>b.onclick=()=>togglePlay(n,b.dataset.bi));
   if(n.k==='create')initCreate(n);
