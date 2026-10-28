@@ -39,6 +39,12 @@ async function ensureSignedIn() {
   return u;
 }
 
+// 문서 이름: 1마디는 예전 방식 그대로, 2·4마디는 뒤에 _m2, _m4 를 붙여요.
+const idOf = (uid, { type, classCode, no, beats, measures }) => {
+  const tail = measures > 1 ? `_${beats}_m${measures}` : `_${beats}`;
+  return type === "group" ? `${classCode}_g${no}${tail}` : `${uid}_${classCode}_s${no}${tail}`;
+};
+
 window.FB = {
   newKey,
 
@@ -57,11 +63,9 @@ window.FB = {
   // ----- 학생: 작품 저장 -----
   // 개인(solo): 같은 기기·반·번호·박자는 한 문서를 덮어써요.
   // 모둠(group): 같은 반·모둠 번호·박자는 한 문서를 모둠 친구들이 함께 덮어써요.
-  async saveCreation({ type, classCode, no, joinKey, beats, fill, cells, submit }) {
+  async saveCreation({ type, classCode, no, joinKey, beats, measures = 1, title = "", fill, cells, submit }) {
     const u = await ensureSignedIn();
-    const id = type === "group"
-      ? `${classCode}_g${no}_${beats}`
-      : `${u.uid}_${classCode}_s${no}_${beats}`;
+    const id = idOf(u.uid, { type, classCode, no, beats, measures });
     const ref = doc(db, "creations", id);
     const snap = await getDoc(ref);
     const sub = submit
@@ -71,10 +75,10 @@ window.FB = {
       if (snap.data().submitted === true) {
         throw Object.assign(new Error("submitted"), { code: "submitted" });
       }
-      await updateDoc(ref, { uid: u.uid, joinKey, fill, cells, updatedAt: serverTimestamp(), ...sub });
+      await updateDoc(ref, { uid: u.uid, joinKey, fill, cells, title, measures, updatedAt: serverTimestamp(), ...sub });
     } else {
       await setDoc(ref, {
-        uid: u.uid, type, classCode, no, joinKey, beats, fill, cells,
+        uid: u.uid, type, classCode, no, joinKey, beats, measures, title, fill, cells,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...sub
       });
     }
@@ -109,11 +113,9 @@ window.FB = {
   },
   deleteCreation(id) { return deleteDoc(doc(db, "creations", id)); },
   setFeedback(id, feedback) { return updateDoc(doc(db, "creations", id), { feedback }); },
-  async getMine({ type, classCode, no, beats }) {
+  async getMine({ type, classCode, no, beats, measures = 1 }) {
     const u = await ensureSignedIn();
-    const id = type === "group"
-      ? `${classCode}_g${no}_${beats}`
-      : `${u.uid}_${classCode}_s${no}_${beats}`;
+    const id = idOf(u.uid, { type, classCode, no, beats, measures });
     const snap = await getDoc(doc(db, "creations", id));
     return snap.exists() ? snap.data() : null;
   },

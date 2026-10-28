@@ -1,9 +1,9 @@
 const PL='https://www.youtube.com/playlist?list=PLj1IpoVjqSqYH16ILDFj7LZq17ZXvyGBe';
 /* 페이지별 영상: 유튜브 주소나 11자 ID를 그대로 붙여 넣으면 그 영상만 나와요. 예) o:'https://youtu.be/AbCdEfGhIjK'. 비워 두면 재생목록 전체가 나와요. */
-const VID={o:'',po:'',st:'',f1:'',f4:'',m8:'',m16:'',a1:'',a2:'',a3:'',a4:'',a5:'',a6:'',a7:'',a8:''};
+const VID={o:'',po:'',st:'',f1:'',f4:'V20kfzhjVw8',m8:'V20kfzhjVw8',m16:'V20kfzhjVw8',a1:'V20kfzhjVw8',a2:'V20kfzhjVw8',a3:'V20kfzhjVw8',a4:'V20kfzhjVw8',a5:'V20kfzhjVw8',a6:'V20kfzhjVw8',a7:'lnre7tFfKx4',a8:'82QbjPoHmyg'};
 
-const LB={4:['1','2','3','4'],8:['1','n','2','n','3','n','4','n'],16:['1','e','n','a','2','e','n','a','3','e','n','a','4','e','n','a'],3:['1','2','3'],12:['1','','','2','','','3','','','4','','']};
-const R=(labels,beats,bars,tip)=>({k:'r',labels:LB[labels],beats,bars,tip});
+const LB={4:['1','2','3','4'],8:['1','n','2','n','3','n','4','n'],16:['1','e','&','a','2','e','&','a','3','e','&','a','4','e','&','a'],3:['1','2','3'],12:['1','','','2','','','3','','','4','','']};
+const R=(labels,beats,bars,txt,ex)=>({k:'r',labels:LB[labels],beats,bars,txt:txt||[],ex:!!ex});
 const TREE={id:'home',t:'즐거운 카혼수업',c:[
 {id:'theory',t:'이론',d:'유래, 자세, 구조',c:[
  {id:'o',t:'카혼의 유래',k:'origin'},
@@ -12,92 +12,116 @@ const TREE={id:'home',t:'즐거운 카혼수업',c:[
 {id:'play',t:'연주',d:'기초, 기본, 응용',c:[
  {id:'p1',t:'기초',d:'기호와 손, 4비트',c:[
   {id:'f1',t:'1. 구조별 기호와 손 표시',k:'sym'},
-  {id:'f4',t:'2. 4비트 연주',...R(4,4,[{t:'1마디',p:'BR HL BR HL'}],'오른손, 왼손을 번갈아 치며 한 박에 하나씩 연주해요.')}]},
+  {id:'f4',t:'2. 4비트 연주',...R(4,4,[{t:'1마디',p:'BR TL HR TL'}],['오른손, 왼손을 번갈아 치며 한 박에 하나씩 연주해요.','‘뚝 치 따 치’를 외치면서 연주해요.'])}]},
  {id:'p2',t:'기본',d:'8비트, 16비트',c:[
-  {id:'m8',t:'1. 8비트',...R(8,4,[{t:'1마디',p:'BR BL HR TL BR BL HR TL'}],'한 박을 둘로 나눈 8분음표 칸이에요. 기호의 모양과 글자(R, L)로 칠 소리와 손을 확인하세요.')},
-  {id:'m16',t:'2. 16비트',...R(16,4,[{t:'1마디',p:'BR . . . HL . . . BR . BL . HL . . .'}],'한 박을 넷으로 나눈 16분음표 칸이에요. 천천히 세면서 시작하세요.')}]},
- {id:'p3',t:'응용',d:'엇박, 필인, 다양한 리듬',c:[
-  {id:'a1',t:'1. 8비트 응용',...R(8,4,[{t:'1마디',p:'BR . HL BR BR . HL .'}],'기본 8비트에 베이스를 하나 더 넣은 리듬이에요.')},
-  {id:'a2',t:'2. 8비트 엇박',...R(8,4,[{t:'1마디',p:'BR . . HL BR . . HL'}],'셰이프가 박의 뒤쪽(n)에 놓여 흔들리는 느낌이 나요.')},
-  {id:'a3',t:'3. 8비트 필인',...R(8,4,[{t:'1마디 (기본 리듬)',p:'BR BL HR TL BR BL HR TL'},{t:'2마디 (필인)',p:'BR . HL . HR HL BR BL'}],'마디 끝에서 리듬을 바꿔 다음 마디로 이어 주는 연결 리듬이에요.')},
-  {id:'a4',t:'4. 16비트 응용',...R(16,4,[{t:'1마디',p:'BR . . HR HL . . HR BR . BL . HL . HR .'}],'16비트 기본에 칸을 더 채운 리듬이에요.')},
-  {id:'a5',t:'5. 16비트 엇박',...R(16,4,[{t:'1마디',p:'BR . . HR . HL . . BR . . HR . HL . .'}],'셰이프가 박 사이로 들어가는 16비트 리듬이에요.')},
-  {id:'a6',t:'6. 16비트 필인',...R(16,4,[{t:'1마디 (기본 리듬)',p:'BR . . . HL . . . BR . BL . HL . . .'},{t:'2마디 (필인)',p:'HR HL HR HL BR BL BR BL HR HL HR HL BR BL BR BL'}],'빠르게 손을 번갈아 치며 마디를 마무리해요.')},
-  {id:'a7',t:'7. 다양한 리듬 1',...R(3,3,[{t:'3박자 (왈츠)',p:'BR HL HL'}],'3박자 리듬이에요. 첫 박에 베이스, 나머지 두 박에 셰이프를 쳐요.')},
-  {id:'a8',t:'8. 다양한 리듬 2',...R(12,4,[{t:'셔플 (한 박을 셋으로)',p:'BR . BL HL . HR BR . BL HL . HR'}],'한 박을 셋으로 나누는 셔플 느낌이에요. 길게-짧게 흔들며 쳐요.')}]}]},
+  {id:'m8',t:'1. 8비트',...R(8,4,[{t:'1마디',p:'BR TL HR BL BR TL HR BL'}],['한 박을 둘로 나누는 8분음표 칸이에요. 기호의 모양과 글자(R, L)로 칠 소리와 손을 확인하세요.','기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.'])},
+  {id:'m16',t:'2. 16비트',...R(16,4,[{t:'1마디',p:'BR TL TR TL HR TL TR TL BR TL TR TL HR TL TR TL'}],['한 박을 넷으로 나누는 16분음표 칸이에요. 천천히 세면서 시작하세요.','기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.'])}]},
+ {id:'p3',t:'응용',d:'엇박, 필인, 다양한 리듬, 연습곡',c:[
+  {id:'a1',t:'1. 8비트 응용',...R(8,4,[{t:'예시 1',p:'BR TL HR TL BR BL HR TL'},{t:'예시 2',p:'BR TL HR BL BR TL HR BL'}],[],true)},
+  {id:'a2',t:'2. 8비트 엇박 리듬',...R(8,4,[{t:'예시 1',p:'BR TL HR BL TR TL HR TL'},{t:'예시 2',p:'BR TL HR TL TR BL HR TL'}],[],true)},
+  {id:'a3',t:'3. 8비트 필인',...R(8,4,[{t:'',p:'BR BL BR BL HR HL HR HL'}])},
+  {id:'a4',t:'4. 16비트 응용',...R(16,4,[{t:'',p:'BR TL BR TL HR TL TR TL BR TL BR TL HR TL TR TL'}])},
+  {id:'a5',t:'5. 16비트 엇박',...R(16,4,[{t:'예시 1',p:'BR TL BR TL HR TL TR TL TR TL BR TL HR TL TR TL'},{t:'예시 2',p:'BR TL BR TL HR TL TR TL TR TL BR TL HR TL TR TL'}],[],true)},
+  {id:'a6',t:'6. 16비트 필인',...R(16,4,[{t:'',p:'BR TL BR TL HR TL TR TL TR TL BR TL HR HL HR HL'}])},
+  {id:'a7',t:'7. 다양한 리듬 1',...R(3,3,[{t:'3박자 (왈츠)',p:'BR HL HL'}],['3박자 리듬이에요. 첫 박에 베이스, 나머지 두 박에 슬랩을 쳐요.'])},
+  {id:'a8',t:'8. 다양한 리듬 2',...R(12,4,[{t:'셔플 (한 박을 셋으로)',p:'BR . BL HL . HR BR . BL HL . HR'}],['한 박을 셋으로 나누는 셔플 느낌이에요. 길게-짧게 흔들며 쳐요.'])},
+  {id:'a9',t:'9. 연습곡',k:'song'}]}]},
 {id:'make',t:'창작',d:'박자와 필인을 골라 리듬 만들기',k:'create'}]};
 
 function find(id,n=TREE,path=[]){if(n.id===id)return[...path,n];for(const c of n.c||[]){const r=find(id,c,[...path,n]);if(r)return r}return null}
 const $=s=>document.querySelector(s);
 let ac,timer=null;
 
-function cajon(){return `<svg viewBox="0 0 220 200" role="img" aria-label="카혼 앞면"><rect x="30" y="20" width="160" height="160" rx="6" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><rect x="38" y="28" width="144" height="144" rx="3" fill="#e8bb7c" stroke="#7a4a17"/></svg>`}
-function structSvg(){return `<svg viewBox="0 0 300 220" role="img" aria-label="카혼 구조"><rect x="90" y="50" width="120" height="130" rx="5" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><rect x="98" y="62" width="104" height="110" fill="#e8bb7c" stroke="#7a4a17"/><rect x="90" y="40" width="120" height="12" rx="3" fill="#a9772e"/><rect x="96" y="180" width="14" height="8" fill="#333"/><rect x="190" y="180" width="14" height="8" fill="#333"/><g stroke="var(--mute)" fill="none"><path d="M90 46H40"/><path d="M98 110H40"/><path d="M96 184H40"/><path d="M210 110H255"/></g><g fill="var(--ink)" font-size="12"><text x="4" y="42">앉는 면</text><text x="4" y="106">타격면</text><text x="4" y="200">고무 발</text><text x="214" y="96">몸통</text><text x="214" y="126">(속: 스네어)</text></g></svg>`}
-function posSvg(){return `<svg viewBox="0 0 240 190" role="img" aria-label="카혼 연주 자세"><line x1="10" y1="172" x2="230" y2="172" stroke="var(--line)" stroke-width="3"/><rect x="90" y="112" width="60" height="60" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><g stroke="var(--ink)" stroke-width="5" stroke-linecap="round" fill="none"><path d="M120 106L112 52"/><path d="M120 106H178L178 168H196"/><path d="M114 64L152 130"/></g><circle cx="110" cy="38" r="13" fill="none" stroke="var(--ink)" stroke-width="4"/><g fill="var(--ink)" font-size="11"><text x="8" y="60">등은 곧게,</text><text x="8" y="74">살짝 뒤로</text><text x="168" y="96">무릎 약 90°</text><text x="156" y="146">손은 앞면(타격면)</text></g></svg>`}
 
-function box(svg,cap){return `<div class="ph">${svg}<div>${cap}</div></div>`}
-function padSection(){return `<h3>카혼 두드려 보기</h3><div class="card"><p class="hint" style="margin-top:0">화면의 카혼을 직접 두드려 보세요. 먼저 여기서 연습하고, 실제 카혼으로 연주해 보세요. 리듬을 ‘들어보기’ 하면 칠 자리가 깜빡여요.</p><svg class="pad" viewBox="0 0 220 200" role="group" aria-label="두드릴 수 있는 카혼"><rect x="30" y="20" width="160" height="160" rx="6" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><rect x="38" y="28" width="144" height="144" rx="3" fill="#e8bb7c" stroke="#7a4a17"/><rect x="34" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="160" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="26" y="180" width="168" height="16" rx="3" fill="#a9772e" stroke="#7a4a17" stroke-width="2"/><text x="110" y="192" text-anchor="middle" style="font-size:10px;fill:#fff;pointer-events:none">앉는 면 (연주자 쪽)</text><g class="z" data-k="B" tabindex="0" role="button" aria-label="베이스"><circle class="zs" cx="110" cy="84" r="26"/><text x="110" y="88" text-anchor="middle">베이스</text></g><g class="z" data-k="H" tabindex="0" role="button" aria-label="셰이프"><rect class="zs" x="70" y="134" width="34" height="34"/><text x="87" y="155" text-anchor="middle" style="font-size:10px">셰이프</text></g><g class="z" data-k="H" tabindex="0" role="button" aria-label="셰이프"><rect class="zs" x="116" y="134" width="34" height="34"/><text x="133" y="155" text-anchor="middle" style="font-size:10px">셰이프</text></g><g class="z" data-k="T" tabindex="0" role="button" aria-label="터치"><polygon class="zs" points="54,135 70,151 54,167 38,151"/><text x="54" y="154" text-anchor="middle" style="font-size:9px">터치</text></g><g class="z" data-k="T" tabindex="0" role="button" aria-label="터치"><polygon class="zs" points="166,135 182,151 166,167 150,151"/><text x="166" y="154" text-anchor="middle" style="font-size:9px">터치</text></g></svg><p class="hint" style="margin-bottom:0">연주자가 앉아서 내려다본 방향의 그림이에요. 그림 아래쪽이 연주자 쪽(앉는 면)이에요. 빨강 원은 베이스, 파랑 네모는 셰이프(세게), 노랑 다이아몬드는 터치(약하게)예요.</p></div>`}
+function padSection(){return `<h3>카혼 두드려 보기</h3><div class="card"><p class="hint" style="margin-top:0">화면의 카혼을 직접 두드려 보세요. 먼저 여기서 연습하고, 실제 카혼으로 연주해 보세요. 리듬을 ‘들어보기’ 하면 칠 자리가 깜빡여요.</p><svg class="pad" viewBox="0 0 220 200" role="group" aria-label="두드릴 수 있는 카혼"><rect x="30" y="20" width="160" height="160" rx="6" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><rect x="38" y="28" width="144" height="144" rx="3" fill="#e8bb7c" stroke="#7a4a17"/><rect x="34" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="160" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="26" y="180" width="168" height="16" rx="3" fill="#a9772e" stroke="#7a4a17" stroke-width="2"/><text x="110" y="192" text-anchor="middle" style="font-size:10px;fill:#fff;pointer-events:none">앉는 면 (연주자 쪽)</text><g class="z" data-k="B" tabindex="0" role="button" aria-label="베이스"><circle class="zs" cx="110" cy="84" r="26"/><text x="110" y="88" text-anchor="middle">베이스</text></g><g class="z" data-k="HL" tabindex="0" role="button" aria-label="슬랩 왼손"><rect class="zs" x="70" y="134" width="34" height="34"/><text x="87" y="154" text-anchor="middle" style="font-size:10px">슬랩</text><text x="87" y="164" text-anchor="middle" style="font-size:8px">L</text></g><g class="z" data-k="HR" tabindex="0" role="button" aria-label="슬랩 오른손"><rect class="zs" x="116" y="134" width="34" height="34"/><text x="133" y="154" text-anchor="middle" style="font-size:10px">슬랩</text><text x="133" y="164" text-anchor="middle" style="font-size:8px">R</text></g><g class="z" data-k="TL" tabindex="0" role="button" aria-label="핑거 왼손"><polygon class="zs" points="54,135 70,151 54,167 38,151"/><text x="54" y="151" text-anchor="middle" style="font-size:9px">핑거</text><text x="54" y="160" text-anchor="middle" style="font-size:8px">L</text></g><g class="z" data-k="TR" tabindex="0" role="button" aria-label="핑거 오른손"><polygon class="zs" points="166,135 182,151 166,167 150,151"/><text x="166" y="151" text-anchor="middle" style="font-size:9px">핑거</text><text x="166" y="160" text-anchor="middle" style="font-size:8px">R</text></g></svg><p class="hint" style="margin-bottom:0">연주자가 앉아서 내려다본 방향의 그림이에요. 그림 아래쪽이 연주자 쪽(앉는 면)이에요. 빨강 원은 베이스, 파랑 네모는 슬랩(세게), 노랑 다이아몬드는 핑거(약하게)예요.</p></div>`}
 function hit(k,z){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();snd(k[0]);z.classList.add('hit');setTimeout(()=>z.classList.remove('hit'),140)}
-function flash(tk){document.querySelectorAll('.z[data-k="'+tk[0]+'"]').forEach(z=>{z.classList.add('hit');setTimeout(()=>z.classList.remove('hit'),140)})}
+function flash(tk,keep){document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
+  const key=tk[0]==='B'?'B':tk.slice(0,2);document.querySelectorAll('.z[data-k="'+key+'"]').forEach(z=>z.classList.add('cur'))}
 function ytId(v){v=String(v||'').trim();const m=v.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(v)?v:'')}
 function video(id){
   const v=ytId(VID[id]),LID=new URLSearchParams(PL.split('?')[1]).get('list');
-  const src=v?`https://www.youtube-nocookie.com/embed/${v}?rel=0`:`https://www.youtube-nocookie.com/embed/videoseries?list=${LID}&rel=0`;
-  return `<h3>수업 영상</h3><div class="vid"><iframe src="${src}" title="카혼 수업 영상" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`+(v?'':`<p class="hint">재생목록이 이 화면 안에 들어 있어요. 영상 오른쪽 위 목록 버튼으로 이 페이지에 맞는 영상을 골라요.</p>`)+`<a class="btn" href="${PL}" target="_blank" rel="noopener">유튜브에서 재생목록 열기</a>`;
+  const src=v?`https://www.youtube-nocookie.com/embed/${v}?rel=0&playsinline=1`:`https://www.youtube-nocookie.com/embed/videoseries?list=${LID}&rel=0&playsinline=1`;
+  return `<h3>수업 영상</h3><div class="vid"><iframe src="${src}" title="카혼 수업 영상" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe></div>`+(v?'':`<p class="hint">재생목록이 이 화면 안에 들어 있어요. 영상 오른쪽 위 목록 버튼으로 이 페이지에 맞는 영상을 골라요.</p>`)+`<a class="btn" href="${PL}" target="_blank" rel="noopener">유튜브에서 재생목록 열기</a>`;
 }
-function stopPlay(){clearInterval(timer);timer=null;document.querySelectorAll('.c.on,.slot.on').forEach(e=>e.classList.remove('on'));const b=$('#pb');if(b)b.textContent='▶ 들어보기'}
+function stopPlay(){clearInterval(timer);clearTimeout(timer);timer=null;playTok++;
+  document.querySelectorAll('.c.on,.slot.on').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
+  document.querySelectorAll('.pbx').forEach(b=>b.textContent=b.dataset.t||'▶ 들어보기');const b=$('#pb');if(b)b.textContent='▶ 들어보기'}
 function snd(k){const t=ac.currentTime;
   if(k==='B'){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(55,t+.2);g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.32)}
   else{const T=k==='T',n=Math.floor(ac.sampleRate*.08),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=1800;g.gain.value=T?.2:.6;s.buffer=b;s.connect(f).connect(g).connect(ac.destination);s.start(t)}}
-async function togglePlay(n){
-  if(timer){stopPlay();return}
+let playTok=0,playing=null;
+async function togglePlay(n,bi){
+  if(timer&&playing===bi){stopPlay();playing=null;return}
+  stopPlay();playing=bi;
   ac=ac||new (window.AudioContext||window.webkitAudioContext)();await ac.resume();
-  const cells=[...document.querySelectorAll('.c')],toks=n.bars.flatMap(b=>b.p.split(' '));
-  const bpm=+$('#bpm').value,per=n.labels.length,ms=60000/bpm*n.beats/per;let i=0;
-  $('#pb').textContent='■ 멈추기';
-  const step=()=>{cells.forEach(c=>c.classList.remove('on'));const c=cells[i];c.classList.add('on');const tk=toks[i];if(tk!=='.'){snd(tk[0]);flash(tk)}i=(i+1)%cells.length};
-  step();timer=setInterval(step,ms);
-}
-function SYM(k,h){const sh=k==='B'?'<circle class="o fB" cx="20" cy="20" r="17"/>':k==='H'?'<rect class="o fH" x="3" y="3" width="34" height="34"/>':'<polygon class="o fT" points="20,2 38,20 20,38 2,20"/>';return `<svg class="sym" viewBox="0 0 40 40" role="img" aria-label="${k==='B'?'베이스':k==='H'?'셰이프':'터치'}">${sh}${h?`<text x="20" y="27.5"${k==='T'?' style="fill:#1b1b1b"':''}>${h}</text>`:''}</svg>`}
-function grid(n){
-  const per=n.labels.length,gap=per/n.beats;
-  return n.bars.map(b=>{const tk=b.p.split(' ');
-    return `<div class="bar"><div class="bt">${b.t}</div><div class="g" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`+tk.map((x,i)=>`<div class="c${i%gap===0?' b':''}"><div class="l">${n.labels[i%per]}</div>`+(x==='.'?`<div class="r">·</div>`:SYM(x[0],x[1]))+`</div>`).join('')+`</div></div>`}).join('');
-}
+  const my=playTok,bars=[...document.querySelectorAll('.bar')],bpm=+($('#bpm')||{value:80}).value||80,loop=bi!=='all';
+  const idx=bi==='all'?bars.map((_,i)=>i):[+bi],steps=[];
+  idx.forEach(i=>{const cells=[...bars[i].querySelectorAll('.c')],toks=n.bars[i].p.split(' '),per=toks.length,ms=60000/bpm*(n.bars[i].beats||n.beats)/per;
+    cells.forEach((c,j)=>steps.push({c,tk:toks[j],ms,bar:bars[i]}))});
+  document.querySelectorAll('.pbx').forEach(b=>{if(b.dataset.bi===String(bi))b.textContent='■ 멈추기'});
+  let i=0;
+  const step=()=>{if(my!==playTok)return;
+    document.querySelectorAll('.c.on').forEach(e=>e.classList.remove('on'));
+    if(i>=steps.length){if(loop)i=0;else{stopPlay();playing=null;return}}
+    const st=steps[i];st.c.classList.add('on');
+    if(st.tk!=='.'){snd(st.tk[0]);flash(st.tk)}else document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
+    i++;timer=setTimeout(step,st.ms)};
+  step()}
+function SYM(k,h){const sh=k==='B'?'<circle class="o fB" cx="20" cy="20" r="17"/>':k==='H'?'<rect class="o fH" x="3" y="3" width="34" height="34"/>':'<polygon class="o fT" points="20,2 38,20 20,38 2,20"/>';return `<svg class="sym" viewBox="0 0 40 40" role="img" aria-label="${k==='B'?'베이스':k==='H'?'슬랩':'핑거'}">${sh}${h?`<text x="20" y="27.5"${k==='T'?' style="fill:#1b1b1b"':''}>${h}</text>`:''}</svg>`}
+function gridOne(n,b){const tk=b.p.split(' '),per=tk.length,beats=b.beats||n.beats,gap=Math.max(1,per/beats),lab=LB[per]||tk.map(()=>'');
+  return `<div class="g" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`+tk.map((x,i)=>`<div class="c${i%gap===0?' b':''}"><div class="l">${lab[i]}</div>`+(x==='.'?`<div class="r">·</div>`:SYM(x[0],x[1]))+`</div>`).join('')+`</div>`}
+function grid(n){return n.bars.map(b=>`<div class="bar">${b.t?`<div class="bt">${b.t}</div>`:''}${gridOne(n,b)}</div>`).join('')}
+const BPMSL='<label>빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label>';
+const SA='BR TL HR TL BR TL HR TL',SB='BR TL HR TL BR BL HR TL',SC='BR . TL . HR . TL . BR . TL . HR HL HR HL',SD='BR . BR . BR TL HR BL',SE='BR TL HR TL BR TL HR BL',SF='. BR BR BR BR . . .';
+const SONG=[SA,SB,SA,SB,SA,SB,SA,SC,SA,SB,SA,SB,SA,SB,SA,SC,SD,SE,SA,SC,SD,SE,SE,SF];
+const para=a=>a.map(t=>`<p>${t}</p>`).join('');
 function body(n){
   let h=`<h2>${n.t}</h2>`;
   if(n.k==='create')return h+createHtml(n);
-  if(n.k==='origin')h+=box(cajon(),'사진 자리 (사진을 보내 주시면 넣어 드려요)')+`<ul class="pts"><li>카혼은 남미 페루에서 시작된 상자 모양의 타악기예요. 스페인어로 ‘상자’라는 뜻이에요.</li><li>식민지 시기에 아프리카에서 끌려온 사람들이 악기를 쓰지 못하게 되자, 항구의 나무 상자와 서랍을 두드리며 음악을 이어 갔다고 전해져요.</li><li>그 전통이 페루의 아프로페루 음악으로 자리 잡았어요.</li><li>1970년대 후반 플라멩코 기타리스트 파코 데 루시아가 페루에서 카혼을 접하고 플라멩코에 쓰면서 세계로 퍼졌어요.</li><li>작고 가벼워 드럼 대신 쓰기 좋아서, 지금은 어쿠스틱 공연과 학교 수업에서도 널리 쓰여요.</li></ul>`;
-  else if(n.k==='posture')h+=box(posSvg(),'사진 자리 (사진을 보내 주시면 넣어 드려요)')+`<ul class="pts"><li>카혼 윗면에 앉아요. 엉덩이가 앉는 면 가운데에 오게 해요.</li><li>등은 곧게 펴고 몸을 살짝 뒤로 기울여요.</li><li>무릎은 약 90°로 굽히고, 발은 바닥에 편하게 둬요.</li><li>두 손은 앞면(타격면) 양쪽에 자연스럽게 올려요.</li><li>어깨와 팔에 힘을 빼고 손목으로 가볍게 쳐요.</li></ul>`;
-  else if(n.k==='structure')h+=box(structSvg(),'사진 자리 (사진을 보내 주시면 넣어 드려요)')+`<ul class="pts"><li><b>앉는 면</b>: 위쪽 판. 연주자가 앉는 곳이에요.</li><li><b>타격면</b>: 앞쪽 얇은 판. 손으로 쳐서 소리를 내요.</li><li><b>몸통</b>: 소리가 울리는 나무 상자예요.</li><li><b>스네어</b>: 몸통 안쪽에 있는 울림 줄이에요. 슬랩을 칠 때 ‘차르륵’ 하는 소리를 더해 줘요.</li><li><b>사운드 홀</b>: 뒷면의 구멍이에요. 소리가 이곳으로 퍼져 나와요.</li><li><b>고무 발</b>: 바닥에서 미끄러지지 않게 받쳐 줘요.</li></ul>`;
-  else if(n.k==='sym')h+=`<h3>기호</h3><div class="card"><div><span class="chip">${SYM('B','R')}<b>베이스</b> (Bass): 빨간 동그라미</span></div><div><span class="chip">${SYM('H','R')}<b>셰이프</b> (Shape): 파란 네모, 세게 치기</span></div><div><span class="chip">${SYM('T','R')}<b>터치</b> (Touch): 노란 다이아몬드, 양쪽 가장자리를 약하게 치기</span></div></div><h3>손 표시</h3><ul class="pts"><li>기호 안의 글자가 손이에요. <b>R</b>은 오른손, <b>L</b>은 왼손이에요.</li><li>기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.</li></ul><h3>읽는 방법</h3><div class="card">${grid({labels:LB[8],beats:4,bars:[{t:'예시',p:'BR BL HR TL BR BL HR TL'}]})}</div><ul class="pts"><li>오른손 베이스, 왼손 베이스, 오른손 셰이프, 왼손 터치를 두 번 반복해요.</li></ul>`;
-  else{h+=`<div class="card">${grid(n)}<div class="ctl"><button id="pb">▶ 들어보기</button><label>빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label></div></div><p>${n.tip}</p><p class="hint">리듬꼴은 기본 예시예요. 영상에서 알려 주는 순서와 손을 함께 확인하세요.</p>`}
+  if(n.k==='origin')h+=`<figure class="fig">${ART.origin()}</figure>`+para(['에스파냐어로 상자, 서랍이라는 뜻의 카혼(Cajón)은 16세기부터 19세기 말 사이에 남아메리카에 노예로 끌려간 아프리카 사람들이 주변에서 흔히 구할 수 있는 나무 상자를 악기 삼아 두드려 연주한 것이 그 기원이 된 타악기로, 외형은 보통 육면체에 사운드홀이 뚫려 있는 형태이다.','페루 리마(Lima)를 중심으로 발생한 직육면체 모양의 페루 카혼과 쿠바의 아바나(Habana)를 중심으로 발생한 다양한 형태의 쿠바 카혼이 있다.','쿠바 카혼이 여전히 쿠바 내에서 주로 사용되고 있는 반면, 페루 카혼은 플라멩코 뮤지션 파코 데 루시아의 밴드에서 페루 카혼을 사용하면서 전 세계에 널리 알려졌다.','쿠바 카혼에 비해 페루 카혼이 훨씬 대중화되어 있기 때문에 오늘날 ‘카혼’이라고 하면 일반적으로 페루 카혼을 의미한다. 페루 카혼은 라틴아메리카 음악 외에도 다양한 대중음악 장르에서 널리 사용되고 있으며, 구조가 비교적 단순해 연주자가 직접 악기를 만들어 사용하는 경우도 많다.'])+'<p class="hint">출처: 악기백과</p>';
+  else if(n.k==='posture')h+=`<figure class="fig">${ART.posture()}<figcaption>카혼 연주 자세(앞모습과 옆모습)</figcaption></figure>`+para(['카혼을 연주할 때는 악기 위에 앉아서 악기의 앞면을 두드려야 하기 때문에 연주 자세가 바르지 않으면 자칫 허리 통증이 발생할 수 있다. 따라서 약간 뒤쪽으로 물러나 허리를 편안하게 펴고 앉는다. 이때 앞판이 두 다리 사이에 와야 한다. 허리를 지나치게 구부리거나 너무 아래쪽까지 손을 뻗는 자세는 통증을 유발할 수 있기 때문에 허리를 많이 굽혀야 할 정도로 낮은 지점은 치지 않는다. 허리에 무리가 가지 않도록 몸을 뒤쪽으로 기울이고 카혼의 앞부분이 살짝 들리게 앉아 연주하는 방법도 있다.']);
+  else if(n.k==='structure')h+=`<figure class="fig">${ART.structure()}</figure><figure class="fig fig-s">${ART.snare()}</figure><ul class="pts boxed"><li><b>앉는 면</b>: 위쪽 판. 연주자가 앉는 곳이에요.</li><li><b>타격면</b>: 앞쪽 얇은 판. 손으로 쳐서 소리를 내요.</li><li><b>몸통</b>: 소리가 울리는 나무 상자예요.</li><li><b>스네어</b>: 몸통 안쪽에 있는 울림 줄이에요. 슬랩을 칠 때 ‘차르륵’ 하는 소리를 더해 줘요.</li><li><b>사운드 홀</b>: 뒷면의 구멍이에요. 소리가 이곳으로 퍼져 나와요.</li><li><b>고무 발</b>: 바닥에서 미끄러지지 않게 받쳐 줘요.</li></ul>`;
+  else if(n.k==='sym')h+=`<h3>기호와 연주법</h3><div class="card"><div><span class="chip">${SYM('B','R')}<span><b>베이스(Bass tap)</b>: 앞판 중앙에 가까운 지점을 쳐 낮고 깊은 소리를 내는 것</span></span></div><div><span class="chip">${SYM('H','R')}<span><b>슬랩(Slap tap)</b>: 카혼 특유의 날카로운 소리를 내는 것</span></span></div><div><span class="chip">${SYM('T','R')}<span><b>핑거(Finger tap)</b>: 손 끝으로 앞판의 윗부분을 두드려 소리를 내는 것. 고스트라고도 함.</span></span></div></div><figure class="fig">${ART.symbols()}</figure><h3>손 표시</h3><ul class="pts boxed"><li>기호 안의 글자가 손이에요. <b>R</b>은 오른손, <b>L</b>은 왼손이에요.</li><li>기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.</li></ul><h3>읽는 방법</h3><div class="card"><div class="bt">예시</div>${gridOne({beats:4},{p:'BR BL HR TL BR BL HR TL'})}</div>`;
+  else if(n.k==='song'){
+    const bars=SONG.map((p,i)=>({t:'마디 '+(i+1),p,beats:4}));n.bars=bars;
+    h+=`<div class="songhead"><b>흔들리는 꽃들 속에서 네 샴푸향이 느껴진거야</b><span class="hint">장범준</span></div>${['practice-score.png','practice-score-1.png','practice-score-2.png','practice-score-3.png','practice-score-4.png'].map((f,i)=>`<img class="score" src="images/${f}" alt="연습곡 악보 ${i||''}" onerror="this.remove()">`).join('')}<div class="card"><div class="ctl"><button class="pbx" data-bi="all" data-t="▶ 처음부터 끝까지 들어보기">▶ 처음부터 끝까지 들어보기</button>${BPMSL}</div><div class="songgrid">`+bars.map((b,i)=>`<div class="bar"><div class="bt">${b.t}</div>${gridOne(n,b)}<div class="ctl"><button class="pbx alt" data-bi="${i}">▶ 이 마디</button></div></div>`).join('')+`</div></div>`;
+    return h}
+  else{
+    const multi=n.ex;
+    h+=`<div class="card">`+n.bars.map((b,i)=>`<div class="bar">${b.t?`<div class="bt">${b.t}</div>`:''}${gridOne(n,b)}${multi?`<div class="ctl"><button class="pbx" data-bi="${i}">▶ 들어보기</button></div>`:''}</div>`).join('')+(multi?`<div class="ctl">${BPMSL}</div>`:`<div class="ctl"><button class="pbx" data-bi="0">▶ 들어보기</button>${BPMSL}</div>`)+`</div>`+para(n.txt)}
   return h+((n.k==='sym'||n.k==='r')?padSection():'')+video(n.id);
 }
 function menuHtml(n,cur){return '<ul>'+n.c.map(c=>`<li><a href="#/${c.id}" class="${c.c?'grp':''}${c.id===cur?' cur':''}">${c.t}</a>${c.c?menuHtml(c,cur):''}</li>`).join('')+'</ul>'}
 const TK=['BR','BL','HR','HL','TR','TL'],AC=window.AudioContext||window.webkitAudioContext,NM={B:'동그라미',H:'네모',T:'다이아몬드'};
 const TIPS={4:'숫자 아래에 칸이 한 칸씩 있어요. 한 박에 하나씩 소리를 골라 나만의 리듬을 만들어 보세요.',8:'숫자 아래에 칸이 두 칸씩 있어요. 숫자 칸은 박, n 칸은 박과 박 사이예요.',16:'숫자 아래에 칸이 네 칸씩 있어요. 한 박을 네 칸으로 나눠 채워 보세요.'};
-let cur=[],sel='',drag=null,sz=4,fl=0;
+let cur=[],sel='',drag=null,sz=4,fl=0,mc=1,ttl='';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-function createHtml(){return `<div class="cbar"><select id="sz" aria-label="박자 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><select id="fi" aria-label="필인 고르기"><option value="0">필인 없음</option><option value="1">필인 있음</option></select><span></span></div><p id="tip"></p><div class="card"><div id="cg"></div><div class="ctl"><button id="pb">▶ 들어보기</button><label>빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label><button class="alt" id="clr">모두 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0">아이콘을 빈 칸으로 끌어다 놓아 보세요. 아이콘을 누른 뒤 칸을 눌러도 돼요. 같은 아이콘을 여러 번 쓸 수 있어요. 칸의 아이콘을 누르면 지워지고, 다른 칸으로 끌면 옮길 수 있어요.</p></div><h3>작품 저장과 제출</h3><div class="card" id="sv"></div>`}
-function loadCur(){const v=lsGet('cajon-c'+sz);cur=Array.isArray(v)&&v.length===sz?v:Array(sz).fill('')}
-function save(){lsSet('cajon-c'+sz,cur)}
+function createHtml(){return `<div class="card ttl"><label>곡 제목 <input id="ct" type="text" maxlength="40" placeholder="곡 제목을 적어요" autocomplete="off"></label></div><div class="cbar"><select id="mc" aria-label="마디 수 고르기"><option value="1">1마디</option><option value="2">2마디</option><option value="4">4마디</option></select><select id="sz" aria-label="비트 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><select id="fi" aria-label="필인 고르기"><option value="0">필인 없음</option><option value="1">4박 필인</option><option value="2">3·4박 필인</option></select></div><p id="tip"></p><div class="card"><div id="cg"></div><div class="ctl"><button id="pb">▶ 들어보기</button><label>빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label><button class="alt" id="clr">모두 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0">아이콘을 빈 칸으로 끌어다 놓아 보세요. 아이콘을 누른 뒤 칸을 눌러도 돼요. 같은 아이콘을 여러 번 쓸 수 있어요. 칸의 아이콘을 누르면 지워지고, 다른 칸으로 끌면 옮길 수 있어요.</p></div><h3>작품 저장과 제출</h3><div class="card" id="sv"></div>`}
+const ckey=()=>'cajon-c'+sz+'x'+mc;
+function loadCur(){const v=lsGet(ckey()),N=sz*mc;cur=Array.isArray(v)&&v.length===N?v:Array(N).fill('')}
+function save(){lsSet(ckey(),cur)}
 function beep(t){ac=ac||new AC();ac.resume();snd(t[0])}
-function initCreate(){sel='';const s0=lsGet('cajon-size');sz=[4,8,16].includes(s0)?s0:4;fl=lsGet('cajon-fill')?1:0;
-  $('#sz').value=sz;$('#fi').value=fl;
+function initCreate(){sel='';const s0=lsGet('cajon-size'),m0=lsGet('cajon-mc'),f0=lsGet('cajon-fill');
+  sz=[4,8,16].includes(s0)?s0:4;mc=[1,2,4].includes(m0)?m0:1;fl=[0,1,2].includes(f0)?f0:(f0?1:0);ttl=lsGet('cajon-title')||'';
+  $('#sz').value=sz;$('#mc').value=mc;$('#fi').value=fl;$('#ct').value=ttl;
   $('#pal').innerHTML=TK.map(t=>`<div class="tk" data-t="${t}" role="button" aria-label="${NM[t[0]]} ${t[1]}">${SYM(t[0],t[1])}</div>`).join('');
   document.querySelectorAll('.tk').forEach(e=>e.onpointerdown=ev=>startDrag(ev,e.dataset.t,null));
   $('#sz').onchange=e=>{sz=+e.target.value;lsSet('cajon-size',sz);loadCur();renderCreate()};
+  $('#mc').onchange=e=>{mc=+e.target.value;lsSet('cajon-mc',mc);loadCur();renderCreate()};
   $('#fi').onchange=e=>{fl=+e.target.value;lsSet('cajon-fill',fl);renderCreate()};
-  $('#clr').onclick=()=>{cur=Array(sz).fill('');save();renderCreate()};
+  $('#ct').oninput=e=>{ttl=e.target.value;lsSet('cajon-title',ttl)};
+  $('#clr').onclick=()=>{cur=Array(sz*mc).fill('');save();renderCreate()};
   loadCur();renderCreate();renderSave()}
-function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,per=Math.min(sz,8),useFill=fl&&sz>4;let h='';
-  $('#fi').disabled=sz===4;
-  $('#tip').textContent=TIPS[sz]+(useFill?' 마지막 박(4)은 필인 자리예요. 앞에서 기본 리듬을 만들고, 필인 칸에서 리듬을 바꿔 마무리해 보세요.':'');
-  for(let r=0;r<sz;r+=per){h+=`<div class="cg" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`;
-    for(let i=r;i<r+per;i++){const fi=useFill&&i>=sz*3/4;h+=`<div class="cc${i%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[i]}</div><div class="slot${cur[i]?' f':''}" data-i="${i}">${cur[i]?SYM(cur[i][0],cur[i][1]):''}</div>${fi?`<div class="fb"></div>${i===sz*3/4?'<div class="ft">필인</div>':''}`:''}</div>`}
-    h+='</div>'}
+function fillFrom(){return fl===2?sz/2:fl===1?sz*3/4:sz}
+function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,per=Math.min(sz,8),ff=fillFrom();let h='';
+  const fillTxt=fl===2?'마지막 마디의 3, 4박은 필인 자리예요.':fl===1?'마지막 마디의 4박은 필인 자리예요.':'';
+  $('#tip').textContent=TIPS[sz]+(mc>1?' 마디가 '+mc+'개라서 위에서 아래로 차례대로 이어져요.':'')+(fl?' '+fillTxt+' 앞에서 기본 리듬을 만들고, 필인 칸에서 리듬을 바꿔 마무리해 보세요.':'');
+  for(let m=0;m<mc;m++){if(mc>1)h+=`<div class="mh">${m+1}마디</div>`;
+    for(let r=0;r<sz;r+=per){h+=`<div class="cg" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`;
+      for(let k=r;k<r+per;k++){const i=m*sz+k,fi=fl>0&&m===mc-1&&k>=ff;
+        h+=`<div class="cc${k%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[k]}</div><div class="slot${cur[i]?' f':''}" data-i="${i}">${cur[i]?SYM(cur[i][0],cur[i][1]):''}</div>${fi?`<div class="fb"></div>${k===ff?'<div class="ft">필인</div>':''}`:''}</div>`}
+      h+='</div>'}}
   $('#cg').innerHTML=h;
   document.querySelectorAll('.slot').forEach(e=>{const i=+e.dataset.i;
     e.onpointerdown=ev=>{if(cur[i])startDrag(ev,cur[i],i)};
@@ -140,17 +164,18 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
   if(!j||!j.classCode){box.innerHTML='<p class="hint" style="margin:0">선생님이 보여 주는 QR 코드로 들어오면 작품을 저장하고 제출할 수 있어요. 지금 만든 리듬은 이 기기에만 저장돼요.</p>';return}
   let ty=(j.group||lsGet('cajon-type')==='group')?'group':'solo';
   const draw=()=>{const g=ty==='group',no=j.group?j.group:(lsGet(g?'cajon-gno':'cajon-no')||''),lk=!!j.group;
-    box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b>${lk?`<span class="badge on">${j.group}모둠</span>`:''}<span class="seg" role="group" aria-label="내는 방법"${lk?' hidden':''}><button class="seg-b${g?'':' on'}" data-t="solo">개인</button><button class="seg-b${g?' on':''}" data-t="group">모둠</button></span>${g&&!lk?`<label>내 번호 <input id="mn" type="number" min="1" max="60" inputmode="numeric" value="${esc(lsGet('cajon-no')||'')}"></label><button class="alt" id="fg">내 모둠 찾기</button>`:''}<label${lk?' hidden':''}>${g?'모둠 번호':'번호'} <input id="no"${lk?' readonly':''} type="number" min="1" max="${g?30:60}" inputmode="numeric" value="${esc(no)}"></label></div><div class="svrow"><button class="alt" id="sd">임시 저장</button><button id="sb">제출하기</button><button class="alt" id="sf">피드백 보기</button><button class="alt" id="sx">반 바꾸기</button></div><p class="hint" id="smsg" style="margin-bottom:0">${g?'모둠 작품은 모둠 번호마다 하나만 저장돼요. 같은 모둠 친구가 저장하면 그 작품에 덮어써지니, 저장하기 전에 모둠 친구와 확인해요. ':'지금 보이는 '+sz+'비트 리듬이에요. '}<b>제출하기</b>를 눌러야 선생님이 볼 수 있고, 제출하면 고칠 수 없어요.</p>`;
+    box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b>${lk?`<span class="badge on">${j.group}모둠</span>`:''}<span class="seg" role="group" aria-label="내는 방법"${lk?' hidden':''}><button class="seg-b${g?'':' on'}" data-t="solo">개인</button><button class="seg-b${g?' on':''}" data-t="group">모둠</button></span>${g&&!lk?`<label>내 번호 <input id="mn" type="number" min="1" max="60" inputmode="numeric" value="${esc(lsGet('cajon-no')||'')}"></label><button class="alt" id="fg">내 모둠 찾기</button>`:''}<label${lk?' hidden':''}>${g?'모둠 번호':'번호'} <input id="no"${lk?' readonly':''} type="number" min="1" max="${g?30:60}" inputmode="numeric" value="${esc(no)}"></label></div><div class="svrow"><button class="alt" id="sd">임시 저장</button><button id="sb">제출하기</button><button class="alt" id="sf">피드백 보기</button><button class="alt" id="sx">반 바꾸기</button></div><p class="hint" id="smsg" style="margin-bottom:0">${g?'모둠 작품은 모둠 번호마다 하나만 저장돼요. 같은 모둠 친구가 저장하면 그 작품에 덮어써지니, 저장하기 전에 모둠 친구와 확인해요. ':'지금 보이는 '+sz+'비트 '+mc+'마디 리듬이에요. '}<b>제출하기</b>를 눌러야 선생님이 볼 수 있고, 제출하면 고칠 수 없어요.</p>`;
     box.querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{ty=b.dataset.t;lsSet('cajon-type',ty);draw()});
     $('#sx').onclick=()=>{try{localStorage.removeItem('cajon-join')}catch(e){}renderSave()};
     const go=async submit=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60;
       if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
       if(!cur.some(x=>x)){m.textContent='먼저 칸에 아이콘을 넣어 리듬을 만들어 주세요.';return}
+      if(submit&&!ttl.trim()){m.textContent='제출하기 전에 곡 제목을 적어 주세요.';return}
       if(g){try{const F0=await fb(),gp=await F0.getGroups(j.classCode);if(gp&&gp.count&&v>gp.count){m.textContent='이 반의 모둠은 1~'+gp.count+'모둠이에요.';return}}catch(e){}}
-      const who=(g?'모둠 '+v:v+'번')+', '+sz+'비트';
+      const who=(g?'모둠 '+v:v+'번')+', '+sz+'비트 '+mc+'마디';
       if(submit&&!confirm(who+' 작품을 제출할까요? 제출하면 고칠 수 없어요.'))return;
       lsSet(g?'cajon-gno':'cajon-no',v);$('#sb').disabled=true;$('#sd').disabled=true;m.textContent=submit?'제출하는 중…':'저장하는 중…';
-      try{const F=await fb();await F.saveCreation({type:ty,classCode:j.classCode,no:v,joinKey:j.key,beats:sz,fill:(fl&&sz>4)?1:0,cells:cur.slice(),submit});
+      try{const F=await fb();await F.saveCreation({type:ty,classCode:j.classCode,no:v,joinKey:j.key,beats:sz,measures:mc,title:ttl.trim().slice(0,40),fill:fl,cells:cur.slice(),submit});
         m.textContent=submit?'제출했어요! 선생님이 볼 수 있어요. ('+who+')':'임시 저장했어요. 아직 제출 전이에요. ('+who+', '+new Date().toLocaleTimeString('ko-KR')+')'}
       catch(e){m.textContent=errMsg(e)}
       const b1=$('#sb'),b2=$('#sd');if(b1)b1.disabled=false;if(b2)b2.disabled=false};
@@ -169,8 +194,8 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
     $('#sf').onclick=async()=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60,sc=n=>n>0?n+'/5':'-';
       if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
       m.textContent='불러오는 중…';
-      try{const F=await fb();const w=await F.getMine({type:ty,classCode:j.classCode,no:v,beats:sz});
-        if(!w){m.textContent='이 번호로 저장한 '+sz+'비트 작품이 아직 없어요.';return}
+      try{const F=await fb();const w=await F.getMine({type:ty,classCode:j.classCode,no:v,beats:sz,measures:mc});
+        if(!w){m.textContent='이 번호로 저장한 '+sz+'비트 '+mc+'마디 작품이 아직 없어요.';return}
         const f=w.feedback;
         if(!f){m.textContent='아직 선생님 피드백이 없어요. '+(w.submitted?'제출은 완료됐어요.':'아직 제출 전이에요.');return}
         m.innerHTML='<b>선생님 피드백</b> · 박자 이해 '+sc(f.s1)+' · 창의성 '+sc(f.s2)+' · 표현 '+sc(f.s3)+(f.comment?'<br>'+esc(f.comment):'')}
@@ -239,10 +264,13 @@ async function showGroupQR(c,d){const tv=$('#tv');
   tv.innerHTML=`<h3>${esc(c)}반 모둠별 QR</h3><p class="hint">모둠마다 QR이 달라요. 각 모둠에 하나씩 보여 주세요. 이 QR로 들어오면 그 모둠 번호로 고정돼요.</p><div class="qrgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px">`+Array.from({length:d.groupCount},(_,i)=>`<div class="card" style="text-align:center"><b>${i+1}모둠</b><div class="qrbox" id="gq${i+1}"></div></div>`).join('')+'</div>';
   tv.scrollIntoView({behavior:'smooth'});
   try{await loadQR();for(let i=1;i<=d.groupCount;i++)new QRCode($('#gq'+i),{text:base+i,width:150,height:150,correctLevel:QRCode.CorrectLevel.M})}catch(e){tv.insertAdjacentHTML('beforeend','<p>QR을 만들지 못했어요. 인터넷 연결을 확인해 주세요.</p>')}}
-function miniGrid(w){const L=LB[w.beats],gap=w.beats/4,per=Math.min(w.beats,8),useFill=w.fill&&w.beats>4;let h='';
-  for(let r=0;r<w.beats;r+=per){h+=`<div class="cg" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`;
-    for(let i=r;i<r+per;i++){const t=TK.includes(w.cells[i])?w.cells[i]:'',fi=useFill&&i>=w.beats*3/4;h+=`<div class="cc${i%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[i]}</div><div class="slot${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`}
-    h+='</div>'}
+const wMc=w=>[1,2,4].includes(w.measures)?w.measures:1;
+const fillTxt=f=>f===2?'3, 4박 필인':f===1?'4박 필인':'필인 없음';
+function miniGrid(w){const L=LB[w.beats],gap=w.beats/4,per=Math.min(w.beats,8),m=wMc(w),ff=w.fill===2?w.beats/2:w.fill===1?w.beats*3/4:w.beats;let h='';
+  for(let q=0;q<m;q++){if(m>1)h+=`<div class="mh">${q+1}마디</div>`;
+    for(let r=0;r<w.beats;r+=per){h+=`<div class="cg" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`;
+      for(let k=r;k<r+per;k++){const i=q*w.beats+k,t=TK.includes(w.cells[i])?w.cells[i]:'',fi=w.fill>0&&q===m-1&&k>=ff;h+=`<div class="cc${k%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[k]}</div><div class="slot${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`}
+      h+='</div>'}}
   return h}
 let wf='sub';
 const SCN=[['s1','박자 이해'],['s2','창의성'],['s3','표현']];
@@ -259,19 +287,19 @@ function board(all,d){
   const gh=gn.map(i=>{const st=stOf(grp.filter(w=>w.no===i));return `<span class="bd g ${st}" aria-label="모둠 ${i} ${txt[st]}">모둠 ${i}<small>${mark[st]}${closed.includes(i)?' 닫힘':''}</small></span>`}).join('');
   return `<div class="card"><div class="ctl"><b>제출 현황 (개인)</b><span class="hint">제출 ${n-miss.length} / ${n}</span><label class="hint">반 인원 <input id="cn" type="number" min="1" max="60" value="${n}" style="width:5em"></label><button class="alt" id="cs">적용</button></div><div>${h}</div>${miss.length?`<p class="hint">아직 안 낸 번호: ${miss.join(', ')}</p>`:'<p class="hint">모두 제출했어요!</p>'}${gn.length?`<div class="ctl"><b>모둠</b></div><div>${gh}</div>`:''}<p class="hint" style="margin-bottom:0">✓ 제출 · ● 작성 중 · ○ 아직 안 냄 (4·8·16비트 중 하나라도 제출하면 ✓)</p></div>`}
 function csvOf(all,d,c){
-  const rows=[['반','구분','번호','박자','필인','상태','제출시각','마지막 저장','박자 이해','창의성','표현','코멘트','리듬']];
+  const rows=[['반','구분','번호','곡 제목','박자','마디 수','필인','상태','제출시각','마지막 저장','박자 이해','창의성','표현','코멘트','리듬']];
   [...all].sort((a,b)=>(a.type===b.type?0:a.type==='group'?-1:1)||a.no-b.no||a.beats-b.beats).forEach(w=>{const f=w.feedback||{};
-    rows.push([c,w.type==='group'?'모둠':'개인',w.no,w.beats+'비트',w.fill&&w.beats>4?'있음':'없음',w.submitted===true?'제출':'작성 중',tmS(w.submittedAt),tmS(w.updatedAt),f.s1||'',f.s2||'',f.s3||'',f.comment||'',w.cells.map(x=>x||'-').join(' ')])});
+    rows.push([c,w.type==='group'?'모둠':'개인',w.no,w.title||'',w.beats+'비트',wMc(w),fillTxt(w.fill),w.submitted===true?'제출':'작성 중',tmS(w.submittedAt),tmS(w.updatedAt),f.s1||'',f.s2||'',f.s3||'',f.comment||'',w.cells.map(x=>x||'-').join(' ')])});
   const have=new Set(all.filter(w=>w.type==='solo').map(w=>w.no)),n=rosterN(all,d);
-  for(let i=1;i<=n;i++)if(!have.has(i))rows.push([c,'개인',i,'','','안 냄','','','','','','','']);
+  for(let i=1;i<=n;i++)if(!have.has(i))rows.push([c,'개인',i,'','','','','안 냄','','','','','','','']);
   return rows.map(r=>r.map(qv).join(',')).join('\r\n')}
 async function showWork(F,c,scroll){const tv=$('#tv');tv.innerHTML='<p class="hint">불러오는 중…</p>';
   let all;try{all=await F.listCreations(c)}catch(e){tv.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
-  all=all.filter(w=>['solo','group'].includes(w.type)&&[4,8,16].includes(w.beats)&&Array.isArray(w.cells)&&w.cells.length===w.beats);
+  all=all.filter(w=>['solo','group'].includes(w.type)&&[4,8,16].includes(w.beats)&&Array.isArray(w.cells)&&w.cells.length===w.beats*wMc(w));
   const d=tcache[c]||{},subN=all.filter(w=>w.submitted===true).length,list=wf==='sub'?all.filter(w=>w.submitted===true):all;
   const srt=(a,b)=>a.no-b.no||a.beats-b.beats,gs=list.filter(w=>w.type==='group').sort(srt),ss=list.filter(w=>w.type==='solo').sort(srt);
   const opts=v=>'<option value="0">-</option>'+[1,2,3,4,5].map(n=>`<option value="${n}"${+v===n?' selected':''}>${n}</option>`).join('');
-  const card=w=>{const sb=w.submitted===true,f=w.feedback||{};return `<div class="card wk" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b><span class="badge${sb?' on':''}">${sb?'제출함':'작성 중'}</span><span class="hint">${w.beats}비트${w.fill&&w.beats>4?' · 필인':''}${sb?(tmS(w.submittedAt)?' · 제출 '+tmS(w.submittedAt):''):(tmS(w.updatedAt)?' · 저장 '+tmS(w.updatedAt):'')}</span></div>${miniGrid(w)}<div class="ctl"><button data-p="1">▶ 들어보기</button>${sb?'<button class="alt" data-r="1">제출 풀기</button>':''}<button class="alt" data-x="1">삭제</button></div><details class="fbx"${w.feedback?' open':''}><summary>점수와 코멘트${w.feedback?' (입력함)':''}</summary><div class="fbg">${SCN.map(([k,nm])=>`<label>${nm} <select data-s="${k}">${opts(f[k])}</select></label>`).join('')}<label class="cm">코멘트 <textarea data-c rows="2" maxlength="300">${esc(f.comment||'')}</textarea></label><div class="ctl"><button data-fs="1">저장</button><span class="hint" data-fst></span></div></div></details></div>`};
+  const card=w=>{const sb=w.submitted===true,f=w.feedback||{};return `<div class="card wk" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b><span class="badge${sb?' on':''}">${sb?'제출함':'작성 중'}</span><span class="hint">${w.title?esc(w.title)+' · ':''}${w.beats}비트 ${wMc(w)}마디${w.fill?' · '+fillTxt(w.fill):''}${sb?(tmS(w.submittedAt)?' · 제출 '+tmS(w.submittedAt):''):(tmS(w.updatedAt)?' · 저장 '+tmS(w.updatedAt):'')}</span></div>${miniGrid(w)}<div class="ctl"><button data-p="1">▶ 들어보기</button>${sb?'<button class="alt" data-r="1">제출 풀기</button>':''}<button class="alt" data-x="1">삭제</button></div><details class="fbx"${w.feedback?' open':''}><summary>점수와 코멘트${w.feedback?' (입력함)':''}</summary><div class="fbg">${SCN.map(([k,nm])=>`<label>${nm} <select data-s="${k}">${opts(f[k])}</select></label>`).join('')}<label class="cm">코멘트 <textarea data-c rows="2" maxlength="300">${esc(f.comment||'')}</textarea></label><div class="ctl"><button data-fs="1">저장</button><span class="hint" data-fst></span></div></div></details></div>`};
   tv.innerHTML=`<h3>${esc(c)}반 작품</h3>`+board(all,d)+`<div class="ctl"><button class="alt" id="csv">엑셀(CSV)로 내려받기</button></div><div class="ctl"><span class="seg" role="group" aria-label="보기 방법"><button class="seg-b${wf==='sub'?' on':''}" data-f="sub">제출한 작품 (${subN})</button><button class="seg-b${wf==='all'?' on':''}" data-f="all">작성 중 포함 전체 (${all.length})</button></span></div>`+(list.length?(gs.length?`<h4 class="sec">모둠 작품 (${gs.length}개)</h4>`+gs.map(card).join(''):'')+(ss.length?`<h4 class="sec">개인 작품 (${ss.length}개)</h4>`+ss.map(card).join(''):''):`<p class="hint">${wf==='sub'?'아직 제출한 작품이 없어요.':'아직 저장된 작품이 없어요.'}</p>`);
   $('#cs').onclick=async()=>{const v=parseInt($('#cn').value,10);if(!(v>=1&&v<=60))return;try{await F.setClass(c,{studentCount:v});if(tcache[c])tcache[c].studentCount=v;showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
   $('#csv').onclick=()=>dl(c+'반_카혼작품_'+new Date().toISOString().slice(0,10)+'.csv',csvOf(all,d,c));
@@ -319,7 +347,8 @@ function route(){
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const t=$('#ttl');if(t)t.onclick=()=>{$('#hb').style.display='grid';$('#hint').style.display='none'};
-  const pb=$('#pb');if(pb)pb.onclick=()=>n.k==='create'?playCreate(n):togglePlay(n);
+  const pb=$('#pb');if(pb&&n.k==='create')pb.onclick=()=>playCreate(n);
+  document.querySelectorAll('.pbx').forEach(b=>b.onclick=()=>togglePlay(n,b.dataset.bi));
   if(n.k==='create')initCreate(n);
   document.querySelectorAll('.z').forEach(z=>{z.onpointerdown=e=>{e.preventDefault();hit(z.dataset.k,z)};z.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();hit(z.dataset.k,z)}}});
   window.scrollTo(0,0);
