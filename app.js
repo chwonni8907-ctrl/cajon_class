@@ -88,7 +88,7 @@ function body(n){
   else if(n.k==='sym')h+=`<h3>기호와 연주법</h3><div class="card"><div><span class="chip">${SYM('B','R')}<span><b>베이스(Bass tap)</b>: 앞판 중앙에 가까운 지점을 쳐 낮고 깊은 소리를 내는 것</span></span></div><div><span class="chip">${SYM('H','R')}<span><b>슬랩(Slap tap)</b>: 카혼 특유의 날카로운 소리를 내는 것</span></span></div><div><span class="chip">${SYM('T','R')}<span><b>핑거(Finger tap)</b>: 손 끝으로 앞판의 윗부분을 두드려 소리를 내는 것. 고스트라고도 함.</span></span></div></div><figure class="fig"><img class="photo" src="${IMG.symbols}" alt="카혼 앞면과 손 모양, 고스트(치)·클랩(짝)·슬랩(따)·베이스(쿵) 연주법" width="1000" height="747" style="max-width:560px"></figure><h3>손 표시</h3><ul class="pts boxed"><li>기호 안의 글자가 손이에요. <b>R</b>은 오른손, <b>L</b>은 왼손이에요.</li><li>기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.</li></ul><h3>읽는 방법</h3><div class="card"><div class="bt">예시</div>${gridOne({beats:4},{p:'BR BL HR TL BR BL HR TL'})}</div>`;
   else if(n.k==='song'){
     const bars=SONG.map((p,i)=>({t:'마디 '+(i+1),p,beats:4}));n.bars=bars;
-    h+=`<div class="songhead"><b>흔들리는 꽃들 속에서 네 샴푸향이 느껴진거야</b><span class="hint">장범준</span></div>${['practice-score','practice-score-1','practice-score-2','practice-score-3','practice-score-4'].map((f,i)=>`<img class="score" src="images/${f}.png" alt="연습곡 악보" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='images/${f}.jpg'}else if(this.dataset.t==1){this.dataset.t=2;this.src='images/${f}.jpeg'}else{this.remove()}">`).join('')}${video(n.id)}<h3>카혼 리듬</h3><div class="card"><div class="ctl"><button class="pbx" data-bi="all" data-t="▶ 처음부터 끝까지 들어보기">▶ 처음부터 끝까지 들어보기</button>${BPMSL}</div><div class="songgrid">`+bars.map((b,i)=>`<div class="bar"><div class="bt">${b.t}</div>${gridOne(n,b)}<div class="ctl"><button class="pbx alt" data-bi="${i}">▶ 이 마디</button></div></div>`).join('')+`</div></div>`;
+    h+=`<div class="songhead"><b>흔들리는 꽃들 속에서 네 샴푸향이 느껴진거야</b><span class="hint">장범준</span></div><div id="scoreBox"></div>${video(n.id)}<h3>카혼 리듬</h3><div class="card"><div class="ctl"><button class="pbx" data-bi="all" data-t="▶ 처음부터 끝까지 들어보기">▶ 처음부터 끝까지 들어보기</button>${BPMSL}</div><div class="songgrid">`+bars.map((b,i)=>`<div class="bar"><div class="bt">${b.t}</div>${gridOne(n,b)}<div class="ctl"><button class="pbx alt" data-bi="${i}">▶ 이 마디</button></div></div>`).join('')+`</div></div>`;
     return h}
   else{
     const multi=n.ex;
@@ -333,6 +333,16 @@ async function playCells(card,cells,beats){
     const jj={classCode:c,key:k};if(gq>=1&&gq<=30){jj.group=gq;lsSet('cajon-type','group');lsSet('cajon-gno',gq)}lsSet('cajon-join',jj);
     try{history.replaceState(null,'',location.pathname+(location.hash||'#/make'))}catch(e){}}})();
 
+/* 연습곡 악보: images 폴더에서 이름이 맞는 이미지를 찾아 <img>로 보여 줘요. 대소문자와 확장자가 달라도 찾아요. */
+function initScore(){const box=$('#scoreBox');if(!box)return;
+  const bases=['practice-score','practice-score-1','practice-score-2','practice-score-3','practice-score-4','score','악보','연습곡'],
+    exts=['png','jpg','jpeg','webp','PNG','JPG','JPEG','WEBP'],dirs=['images/',''],found={};let pending=0;
+  const done=()=>{if(--pending>0)return;
+    const hit=bases.filter(b=>found[b]);
+    if(hit.length){box.innerHTML=hit.map(b=>`<img class="score" src="${found[b]}" alt="연습곡 악보">`).join('')}
+    else box.innerHTML='<p class="hint">악보 이미지를 아직 찾지 못했어요. 선생님 확인용: <a href="images/practice-score.png" target="_blank" rel="noopener">images/practice-score.png</a> 주소가 열려야 해요. (png, jpg, jpeg, webp 가능, 저장소 맨 위에 둬도 찾아요)</p>'};
+  bases.forEach(b=>dirs.forEach(d=>exts.forEach(x=>{pending++;const url=d+encodeURI(b)+'.'+x,im=new Image();
+    im.onload=()=>{if(!found[b])found[b]=url;done()};im.onerror=done;im.src=url+'?v=1028i'})))}
 function route(){
   stopPlay();$('#menu').classList.remove('open');
   const id=(location.hash.replace('#/','')||'home');lastId=id;
@@ -347,12 +357,13 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1028-g</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1028-i</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};
   if(n.id!=='home'){menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}}
   const t=$('#ttl');if(t){t.onclick=showMenu;if(menuShown)showMenu()}
+  if(n.k==='song')initScore();
   const pb=$('#pb');if(pb&&n.k==='create')pb.onclick=()=>playCreate(n);
   document.querySelectorAll('.pbx').forEach(b=>b.onclick=()=>togglePlay(n,b.dataset.bi));
   if(n.k==='create')initCreate(n);
