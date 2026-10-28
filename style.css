@@ -140,3 +140,5 @@ ul.boxed{background:var(--card);border:1px solid var(--line);border-radius:12px;
 .ttl{margin-bottom:8px}.ttl label{display:flex;gap:8px;align-items:center;font-weight:600}.ttl input{flex:1}
 
 .fig img.photo{display:block;width:100%;max-width:560px;height:auto;margin:0 auto;border-radius:14px;background:#fff}
+
+.ver{text-align:center;font-size:.72rem;color:var(--mute);opacity:.7;margin:18px 0 10px}

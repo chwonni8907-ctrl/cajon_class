@@ -1,6 +1,6 @@
 const PL='https://www.youtube.com/playlist?list=PLj1IpoVjqSqYH16ILDFj7LZq17ZXvyGBe';
-/* 페이지별 영상: 유튜브 주소나 11자 ID를 그대로 붙여 넣으면 그 영상만 나와요. 예) o:'https://youtu.be/AbCdEfGhIjK'. 비워 두면 재생목록 전체가 나와요. */
-const VID={o:'',po:'',st:'',f1:'',f4:'V20kfzhjVw8',m8:'V20kfzhjVw8',m16:'V20kfzhjVw8',a1:'V20kfzhjVw8',a2:'V20kfzhjVw8',a3:'V20kfzhjVw8',a4:'V20kfzhjVw8',a5:'V20kfzhjVw8',a6:'V20kfzhjVw8',a7:'lnre7tFfKx4',a8:'82QbjPoHmyg'};
+/* 페이지별 영상: 유튜브 주소나 11자 ID를 붙여 넣으면 그 영상이 나와요. 비워 두면 영상 칸이 나오지 않아요. */
+const VID={o:'',po:'',st:'',f1:'',f4:'V20kfzhjVw8',m8:'V20kfzhjVw8',m16:'V20kfzhjVw8',a1:'V20kfzhjVw8',a2:'V20kfzhjVw8',a3:'V20kfzhjVw8',a4:'V20kfzhjVw8',a5:'V20kfzhjVw8',a6:'V20kfzhjVw8',a7:'lnre7tFfKx4',a8:'82QbjPoHmyg',a9:'qKXMZPH6k18'};
 
 const LB={4:['1','2','3','4'],8:['1','n','2','n','3','n','4','n'],16:['1','e','&','a','2','e','&','a','3','e','&','a','4','e','&','a'],3:['1','2','3'],12:['1','','','2','','','3','','','4','','']};
 const R=(labels,beats,bars,txt,ex)=>({k:'r',labels:LB[labels],beats,bars,txt:txt||[],ex:!!ex});
@@ -44,9 +44,8 @@ function flash(tk,keep){document.querySelectorAll('.z.cur').forEach(z=>z.classLi
   const key=tk[0]==='B'?'B':tk.slice(0,2);document.querySelectorAll('.z[data-k="'+key+'"]').forEach(z=>z.classList.add('cur'))}
 function ytId(v){v=String(v||'').trim();const m=v.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(v)?v:'')}
 function video(id){
-  const v=ytId(VID[id]),LID=new URLSearchParams(PL.split('?')[1]).get('list');
-  const src=v?`https://www.youtube-nocookie.com/embed/${v}?rel=0&playsinline=1`:`https://www.youtube-nocookie.com/embed/videoseries?list=${LID}&rel=0&playsinline=1`;
-  return `<h3>수업 영상</h3><div class="vid"><iframe src="${src}" title="카혼 수업 영상" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe></div>`+(v?'':`<p class="hint">재생목록이 이 화면 안에 들어 있어요. 영상 오른쪽 위 목록 버튼으로 이 페이지에 맞는 영상을 골라요.</p>`)+`<a class="btn" href="${PL}" target="_blank" rel="noopener">유튜브에서 재생목록 열기</a>`;
+  const v=ytId(VID[id]);if(!v)return '';
+  return `<h3>수업 영상</h3><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${v}?rel=0&playsinline=1" title="수업 영상" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe></div>`;
 }
 function stopPlay(){clearInterval(timer);clearTimeout(timer);timer=null;playTok++;
   document.querySelectorAll('.c.on,.slot.on').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
@@ -89,7 +88,7 @@ function body(n){
   else if(n.k==='sym')h+=`<h3>기호와 연주법</h3><div class="card"><div><span class="chip">${SYM('B','R')}<span><b>베이스(Bass tap)</b>: 앞판 중앙에 가까운 지점을 쳐 낮고 깊은 소리를 내는 것</span></span></div><div><span class="chip">${SYM('H','R')}<span><b>슬랩(Slap tap)</b>: 카혼 특유의 날카로운 소리를 내는 것</span></span></div><div><span class="chip">${SYM('T','R')}<span><b>핑거(Finger tap)</b>: 손 끝으로 앞판의 윗부분을 두드려 소리를 내는 것. 고스트라고도 함.</span></span></div></div><figure class="fig"><img class="photo" src="${IMG.symbols}" alt="카혼 앞면과 손 모양, 고스트(치)·클랩(짝)·슬랩(따)·베이스(쿵) 연주법" width="218" height="175" style="max-width:360px"></figure><h3>손 표시</h3><ul class="pts boxed"><li>기호 안의 글자가 손이에요. <b>R</b>은 오른손, <b>L</b>은 왼손이에요.</li><li>기호 위의 숫자와 n은 박을 세는 말이에요. n은 박과 박 사이(엇박)예요.</li></ul><h3>읽는 방법</h3><div class="card"><div class="bt">예시</div>${gridOne({beats:4},{p:'BR BL HR TL BR BL HR TL'})}</div>`;
   else if(n.k==='song'){
     const bars=SONG.map((p,i)=>({t:'마디 '+(i+1),p,beats:4}));n.bars=bars;
-    h+=`<div class="songhead"><b>흔들리는 꽃들 속에서 네 샴푸향이 느껴진거야</b><span class="hint">장범준</span></div>${['practice-score','practice-score-1','practice-score-2','practice-score-3','practice-score-4'].map((f,i)=>`<img class="score" src="images/${f}.png" alt="연습곡 악보" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='images/${f}.jpg'}else if(this.dataset.t==1){this.dataset.t=2;this.src='images/${f}.jpeg'}else{this.remove()}">`).join('')}<div class="card"><div class="ctl"><button class="pbx" data-bi="all" data-t="▶ 처음부터 끝까지 들어보기">▶ 처음부터 끝까지 들어보기</button>${BPMSL}</div><div class="songgrid">`+bars.map((b,i)=>`<div class="bar"><div class="bt">${b.t}</div>${gridOne(n,b)}<div class="ctl"><button class="pbx alt" data-bi="${i}">▶ 이 마디</button></div></div>`).join('')+`</div></div>`;
+    h+=`<div class="songhead"><b>흔들리는 꽃들 속에서 네 샴푸향이 느껴진거야</b><span class="hint">장범준</span></div>${['practice-score','practice-score-1','practice-score-2','practice-score-3','practice-score-4'].map((f,i)=>`<img class="score" src="images/${f}.png" alt="연습곡 악보" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='images/${f}.jpg'}else if(this.dataset.t==1){this.dataset.t=2;this.src='images/${f}.jpeg'}else{this.remove()}">`).join('')}${video(n.id)}<h3>카혼 리듬</h3><div class="card"><div class="ctl"><button class="pbx" data-bi="all" data-t="▶ 처음부터 끝까지 들어보기">▶ 처음부터 끝까지 들어보기</button>${BPMSL}</div><div class="songgrid">`+bars.map((b,i)=>`<div class="bar"><div class="bt">${b.t}</div>${gridOne(n,b)}<div class="ctl"><button class="pbx alt" data-bi="${i}">▶ 이 마디</button></div></div>`).join('')+`</div></div>`;
     return h}
   else{
     const multi=n.ex;
@@ -342,13 +341,13 @@ function route(){
     $('#go').onclick=()=>$('#menu').classList.add('open');window.scrollTo(0,0);teacherInit();return}
   const path=find(id)||find('home'),n=path[path.length-1],par=path[path.length-2];
   let h='';
-  if(n.id==='home'){h=`<main class="home"><button class="title" id="ttl">즐거운 카혼수업</button><p class="hint" id="hint">글자를 눌러 보세요</p><p class="hint" style="font-size:.7rem;opacity:.6">버전 1028-c</p><div class="btns" id="hb" style="display:none;width:min(100%,360px)">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}<small>${c.d}</small></a>`).join('')}</div><a class="tl" href="#/teacher">선생님 전용</a></main>`;
+  if(n.id==='home'){h=`<main class="home"><button class="title" id="ttl">즐거운 카혼수업</button><p class="hint" id="hint">글자를 눌러 보세요</p><div class="btns" id="hb" style="display:none;width:min(100%,360px)">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}<small>${c.d}</small></a>`).join('')}</div><a class="tl" href="#/teacher">선생님 전용</a></main>`;
   }else{
     h=`<header><button class="hb" onclick="goBack()">← 뒤로</button><div class="t">${n.t}</div><button class="hb go" id="go">바로가기</button></header><main>`;
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h;
+  $('#app').innerHTML=h+'<p class="ver">버전 1028-e</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const t=$('#ttl');if(t)t.onclick=()=>{$('#hb').style.display='grid';$('#hint').style.display='none'};
