@@ -52,21 +52,22 @@ service cloud.firestore {
     }
 
     function validCritique(d) {
-      return d.keys().hasOnly(['uid', 'type', 'classCode', 'no', 'joinKey', 'work', 'target', 'text', 'createdAt'])
+      return d.keys().hasOnly(['uid', 'type', 'classCode', 'no', 'joinKey', 'group', 'targetType', 'work', 'target', 'text', 'createdAt'])
         && d.keys().hasAll(['uid', 'type', 'classCode', 'no', 'joinKey', 'work', 'target', 'text', 'createdAt'])
         && d.uid == request.auth.uid
         && d.classCode is string
         && d.classCode.size() >= 1
         && d.classCode.size() <= 20
         && d.classCode.matches('^[A-Za-z0-9_-]+$')
-        && d.type in ['solo', 'group']
+        && d.type == 'solo'
         && d.no is int
         && d.no >= 1
-        && ((d.type == 'solo' && d.no <= 60) || (d.type == 'group' && d.no <= classDoc(d.classCode).get('groupCount', 30)))
+        && d.no <= 60
+        && d.get('targetType', 'group') in ['solo', 'group']
+        && (!('group' in d) || (d.group is int && d.group >= 1 && d.group <= 30 && !(d.group in classDoc(d.classCode).get('closedGroups', []))))
         && d.joinKey is string
         && classDoc(d.classCode).open == true
         && classDoc(d.classCode).joinKey == d.joinKey
-        && !(d.type == 'group' && d.no in classDoc(d.classCode).get('closedGroups', []))
         && d.work is string && d.work.size() >= 1 && d.work.size() <= 60
         && d.target is string && d.target.size() >= 1 && d.target.size() <= 60
         && d.text is string && d.text.size() >= 1 && d.text.size() <= 1500

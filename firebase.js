@@ -86,10 +86,10 @@ window.FB = {
   },
 
   // ----- 비평 -----
-  async saveCritique({ type, classCode, no, joinKey, work, target, text }) {
+  async saveCritique({ classCode, no, joinKey, group = 0, targetType = "group", work, target, text }) {
     const u = await ensureSignedIn();
     await setDoc(doc(collection(db, "critiques")), {
-      uid: u.uid, type, classCode, no, joinKey, work, target, text, createdAt: serverTimestamp()
+      uid: u.uid, type: "solo", classCode, no, joinKey, targetType, ...(group ? { group } : {}), work, target, text, createdAt: serverTimestamp()
     });
   },
   async listCritiques(code) {

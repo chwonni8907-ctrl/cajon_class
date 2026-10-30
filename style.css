@@ -157,3 +157,5 @@ ul.boxed{background:var(--card);border:1px solid var(--line);border-radius:12px;
 .cg.one{gap:2px}.cg.one .l{font-size:.62rem}
 .cg.one .ft{white-space:nowrap}
 .mpv{margin:0 6px 10px;padding:4px 6px;border-radius:8px;background:rgba(127,127,127,.08)}.mpv .slot{pointer-events:none}.mrow.on+.mpv{background:rgba(42,157,143,.22)}
+[hidden]{display:none!important}
+.seg.svrow{margin:4px 0 0}

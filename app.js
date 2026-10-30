@@ -251,7 +251,7 @@ async function renderClasses(F,u){
   try{list=await F.listClasses()}catch(e){box.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
   list.sort((a,b)=>a.id.localeCompare(b.id,'ko',{numeric:true}));
   tcache={};list.forEach(c=>tcache[c.id]=c);
-  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button><button class="alt" data-a="crit">비평 보기</button></div>${c.groupCount?`<div class="ctl"><span class="hint">모둠 수업:</span>${Array.from({length:c.groupCount},(_,i)=>i+1).map(n=>{const cl=(c.closedGroups||[]).includes(n);return `<button class="${cl?'alt':''}" data-a="gtog" data-n="${n}" aria-label="${n}모둠 ${cl?'수업 시작':'수업 마감'}">${n}모둠 ${cl?'시작':'● 진행중'}</button>`}).join('')}</div><div class="ctl"><button data-a="gqr">모둠별 QR</button><button class="alt" data-a="gall">모두 시작</button><button class="alt" data-a="gnone">모두 마감</button><span class="hint">진행중인 모둠만 저장·제출할 수 있어요.</span></div>`:'<div class="ctl"><span class="hint">모둠을 만들면 모둠별 수업 시작 버튼이 나와요.</span></div>'}<div class="ctl"><label class="hint">전체 모둠 수 <input type="number" class="gk" min="2" max="30" inputmode="numeric" placeholder="예: 6" aria-label="만들 모둠 수" style="width:5.5em"></label><button class="alt" data-a="gmake">모둠 만들기</button><button class="alt" data-a="gseq">번호순으로</button><button class="alt" data-a="gview">모둠 보기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
+  box.innerHTML=`<div class="ctl"><span class="hint">${esc(u.email||'')}</span><button class="alt" id="lo">로그아웃</button></div><h3>반 만들기</h3><div class="card"><div class="ctl"><input id="nc" placeholder="예: 3-2" maxlength="20" aria-label="반 코드"><button id="mk">만들기</button></div><p class="hint" id="tm" style="margin-bottom:0">영문, 숫자, - 와 _ 만 쓸 수 있어요. 한글은 안 돼요.</p></div><h3>내 반</h3>`+(list.length?list.map(c=>`<div class="card cls" data-c="${esc(c.id)}"><div class="ctl"><b>${esc(c.id)}반</b><span class="badge${c.open?' on':''}">${c.open?'열림':'닫힘'}</span></div><div class="ctl"><button data-a="qr">개인 QR 보기</button><button class="alt" data-a="toggle">${c.open?'반 닫기':'반 열기'}</button><button class="alt" data-a="key">QR 새로 만들기</button><button class="alt" data-a="work">작품 보기</button><button class="alt" data-a="crit">비평 보기</button></div>${c.groupCount?`<div class="ctl"><span class="hint">모둠 수업:</span>${Array.from({length:c.groupCount},(_,i)=>i+1).map(n=>{const cl=(c.closedGroups||[]).includes(n);return `<button class="${cl?'alt':''}" data-a="gtog" data-n="${n}" aria-label="${n}모둠 ${cl?'수업 시작':'수업 마감'}">${n}모둠 ${cl?'시작':'● 진행중'}</button>`}).join('')}</div><div class="ctl"><button data-a="gqr">모둠별 QR</button><button class="alt" data-a="gall">모두 시작</button><button class="alt" data-a="gnone">모두 마감</button><span class="hint">진행중인 모둠만 저장·제출할 수 있어요.</span></div>`:'<div class="ctl"><span class="hint">모둠을 만들면 모둠별 수업 시작 버튼이 나와요.</span></div>'}<div class="ctl"><label class="hint">전체 모둠 수 <input type="number" class="gk" min="2" max="30" inputmode="numeric" placeholder="예: 6" aria-label="만들 모둠 수" style="width:5.5em"></label><button class="alt" data-a="gmake">모둠 만들기</button><button class="alt" data-a="gseq">번호순으로</button><button class="alt" data-a="gview">모둠 보기</button></div></div>`).join(''):'<p class="hint">아직 만든 반이 없어요.</p>')+'<div id="tv"></div>';
   $('#lo').onclick=async()=>{await F.logout();teacherInit()};
   $('#mk').onclick=async()=>{const c=$('#nc').value.trim();
     if(!/^[A-Za-z0-9_-]{1,20}$/.test(c)){$('#tm').textContent='반 코드는 영문, 숫자, -, _ 만 1~20자로 적어 주세요.';return}
@@ -285,7 +285,7 @@ function showGroups(c,g){const tv=$('#tv'),by={};
   $('#gcp').onclick=()=>{const t=rows.map(([k,m])=>k+'모둠: '+m.join(', ')).join('\n');if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>{$('#gcp').textContent='복사했어요'})};
   tv.scrollIntoView({behavior:'smooth'})}
 async function showQR(c,d){const tv=$('#tv'),url=location.origin+location.pathname+'?class='+encodeURIComponent(c)+'&key='+encodeURIComponent(d.joinKey);
-  tv.innerHTML=`<h3>${esc(c)}반 QR</h3><div class="card" style="text-align:center"><div id="qr" class="qrbox"></div><p class="hint" style="word-break:break-all">${esc(url)}</p><div class="ctl" style="justify-content:center"><button class="alt" id="cp">주소 복사</button></div>${d.open?'':'<p class="hint">이 반은 지금 닫혀 있어서 학생이 저장할 수 없어요.</p>'}</div>`;
+  tv.innerHTML=`<h3>${esc(c)}반 QR (개인용)</h3><p class="hint">이 QR로 들어오면 처음부터 개인으로 시작해요. 모둠 수업은 ‘모둠별 QR’을 쓰세요.</p><div class="card" style="text-align:center"><div id="qr" class="qrbox"></div><p class="hint" style="word-break:break-all">${esc(url)}</p><div class="ctl" style="justify-content:center"><button class="alt" id="cp">주소 복사</button></div>${d.open?'':'<p class="hint">이 반은 지금 닫혀 있어서 학생이 저장할 수 없어요.</p>'}</div>`;
   $('#cp').onclick=()=>{if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>{$('#cp').textContent='복사했어요'})};
   tv.scrollIntoView({behavior:'smooth'});
   try{await loadQR();new QRCode($('#qr'),{text:url,width:260,height:260,correctLevel:QRCode.CorrectLevel.M})}catch(e){$('#qr').textContent='QR을 만들지 못했어요. 아래 주소를 학생에게 알려 주세요.'}}
@@ -363,40 +363,38 @@ async function playCells(card,w){
   step()}
 
 /* ----- 비평 ----- */
-function critHtml(){return `<p class="hint" style="margin-top:0">친구의 작품이나 들은 음악을 골라 비평하는 글을 써요. 아래 순서로 써 보면 좋아요.</p><ol class="pts"><li><b>관찰</b>: 어떤 음악 요소(리듬, 셈여림, 빠르기)가 들렸나요?</li><li><b>해석</b>: 그 요소가 어떤 느낌이나 분위기를 만드나요?</li><li><b>판단</b>: 좋았던 점과 아쉬운 점은 무엇인가요? 그 까닭도 써요.</li><li><b>제안</b>: 어떻게 바꾸면 더 좋아질까요?</li></ol><div class="card" id="cr"></div>`}
+function critHtml(){return `<p class="hint" style="margin-top:0">친구가 발표한 작품이나 들은 음악을 골라 <b>내 생각</b>을 비평하는 글로 써요. 아래 순서로 써 보면 좋아요.</p><ol class="pts"><li><b>관찰</b>: 어떤 음악 요소(리듬, 셈여림, 빠르기)가 들렸나요?</li><li><b>해석</b>: 그 요소가 어떤 느낌이나 분위기를 만드나요?</li><li><b>판단</b>: 좋았던 점과 아쉬운 점은 무엇인가요? 그 까닭도 써요.</li><li><b>제안</b>: 어떻게 바꾸면 더 좋아질까요?</li></ol><div class="card" id="cr"></div>`}
 function initCrit(){const box=$('#cr'),j=lsGet('cajon-join');
   if(!j||!j.classCode){box.innerHTML='<p class="hint" style="margin:0">선생님이 보여 주는 QR 코드로 들어오면 비평을 제출할 수 있어요.</p>';return}
-  let ty=(j.group||lsGet('cajon-type')==='group')?'group':'solo';const dr=lsGet('cajon-crit')||{};
-  box.innerHTML=`<div class="svrow" id="cid"></div><div class="fbg"><label class="cm">비평 작품 <input id="cw" type="text" maxlength="60" placeholder="비평할 작품의 이름 (예: 3모둠의 ‘봄날’)" value="${esc(dr.w||'')}"></label><label class="cm">비평 대상 <input id="cto" type="text" maxlength="60" placeholder="비평할 대상 (예: 변형 리듬의 셈여림)" value="${esc(dr.t||'')}"></label><label class="cm">비평 내용 <textarea id="cx" rows="8" maxlength="1500" placeholder="관찰 → 해석 → 판단 → 제안 순서로 써 보세요.">${esc(dr.x||'')}</textarea></label></div><div class="svrow" style="margin-top:8px"><button id="cb">제출하기</button></div><p class="hint" id="cm" style="margin-bottom:0">제출하면 선생님이 볼 수 있고, 제출한 글은 고칠 수 없어요.</p>`;
-  const sv=()=>lsSet('cajon-crit',{w:$('#cw').value,t:$('#cto').value,x:$('#cx').value});
+  const dr=lsGet('cajon-crit')||{};let tt=dr.k==='solo'?'solo':'group';
+  box.innerHTML=`<div class="svrow"><b>${esc(j.classCode)}반</b>${j.group?`<span class="badge on">${j.group}모둠</span>`:''}<label>내 번호 <input id="cno" type="number" min="1" max="60" inputmode="numeric" value="${esc(lsGet('cajon-no')||'')}"></label></div><p class="hint" style="margin:0 0 8px">비평은 <b>내 번호</b>로 제출해요. 내 생각을 쓰는 글이라서 개인이 써요.</p><div class="fbg"><div class="cm"><span>발표한 대상</span><span class="seg svrow" id="ctt" role="group" aria-label="발표한 대상"><button class="seg-b" data-t="group">모둠</button><button class="seg-b" data-t="solo">개인</button></span></div><label class="cm">비평 작품 <input id="cw" type="text" maxlength="60" placeholder="비평할 작품의 이름 (예: 3모둠의 ‘봄날’)" value="${esc(dr.w||'')}"></label><label class="cm">비평 대상 <input id="cto" type="text" maxlength="60" placeholder="비평할 대상 (예: 변형 리듬의 셈여림)" value="${esc(dr.t||'')}"></label><label class="cm">비평 내용 <textarea id="cx" rows="8" maxlength="1500" placeholder="관찰 → 해석 → 판단 → 제안 순서로 써 보세요.">${esc(dr.x||'')}</textarea></label></div><div class="svrow" style="margin-top:8px"><button id="cb">제출하기</button></div><p class="hint" id="cm" style="margin-bottom:0">제출하면 선생님이 볼 수 있고, 제출한 글은 고칠 수 없어요.</p>`;
+  const sv=()=>lsSet('cajon-crit',{w:$('#cw').value,t:$('#cto').value,x:$('#cx').value,k:tt});
   ['#cw','#cto','#cx'].forEach(q=>$(q).oninput=sv);
-  const draw=()=>{const g=ty==='group',lk=!!j.group,no=lk?j.group:(lsGet(g?'cajon-gno':'cajon-no')||'');
-    $('#cid').innerHTML=`<b>${esc(j.classCode)}반</b>${lk?`<span class="badge on">${j.group}모둠</span>`:''}<span class="seg" role="group" aria-label="내는 방법"${lk?' hidden':''}><button class="seg-b${g?'':' on'}" data-t="solo">개인</button><button class="seg-b${g?' on':''}" data-t="group">모둠</button></span><label${lk?' hidden':''}>${g?'모둠 번호':'번호'} <input id="cno"${lk?' readonly':''} type="number" min="1" max="${g?30:60}" inputmode="numeric" value="${esc(no)}"></label>`;
-    $('#cid').querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{ty=b.dataset.t;lsSet('cajon-type',ty);draw()})};
-  draw();
-  $('#cb').onclick=async()=>{const m=$('#cm'),g=ty==='group',mx=g?30:60,v=parseInt($('#cno').value,10),w=$('#cw').value.trim(),t=$('#cto').value.trim(),x=$('#cx').value.trim();
-    if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
+  const dt=()=>$('#ctt').querySelectorAll('.seg-b').forEach(b=>b.classList.toggle('on',b.dataset.t===tt));
+  $('#ctt').querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{tt=b.dataset.t;sv();dt()});dt();
+  $('#cb').onclick=async()=>{const m=$('#cm'),v=parseInt($('#cno').value,10),w=$('#cw').value.trim(),t=$('#cto').value.trim(),x=$('#cx').value.trim();
+    if(!(v>=1&&v<=60)){m.textContent='내 번호를 1~60 사이로 적어 주세요.';return}
     if(!w){m.textContent='비평 작품을 적어 주세요.';return}
     if(!t){m.textContent='비평 대상을 적어 주세요.';return}
     if(x.length<10){m.textContent='비평 내용을 10자 이상 써 주세요.';return}
-    if(!confirm((g?'모둠 '+v:v+'번')+' 비평을 제출할까요? 제출하면 고칠 수 없어요.'))return;
-    lsSet(g?'cajon-gno':'cajon-no',v);$('#cb').disabled=true;m.textContent='제출하는 중…';
-    try{const F=await fb();await F.saveCritique({type:ty,classCode:j.classCode,no:v,joinKey:j.key,work:w.slice(0,60),target:t.slice(0,60),text:x.slice(0,1500)});
-      lsSet('cajon-crit',{});$('#cw').value='';$('#cto').value='';$('#cx').value='';m.textContent='제출했어요! 선생님이 볼 수 있어요. ('+new Date().toLocaleTimeString('ko-KR')+')'}
+    if(!confirm(v+'번 비평을 제출할까요? 제출하면 고칠 수 없어요.'))return;
+    lsSet('cajon-no',v);$('#cb').disabled=true;m.textContent='제출하는 중…';
+    try{const F=await fb();await F.saveCritique({classCode:j.classCode,no:v,joinKey:j.key,group:j.group||0,targetType:tt,work:w.slice(0,60),target:t.slice(0,60),text:x.slice(0,1500)});
+      lsSet('cajon-crit',{k:tt});$('#cw').value='';$('#cto').value='';$('#cx').value='';m.textContent='제출했어요! 선생님이 볼 수 있어요. ('+new Date().toLocaleTimeString('ko-KR')+')'}
     catch(e){m.textContent=errMsg(e)}
     $('#cb').disabled=false}}
 async function showCrit(F,c){const tv=$('#tv');tv.innerHTML='<p class="hint">불러오는 중…</p>';
   let all;try{all=await F.listCritiques(c)}catch(e){tv.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
-  all=all.filter(w=>['solo','group'].includes(w.type)).sort((a,b)=>(a.type===b.type?0:a.type==='group'?-1:1)||a.no-b.no||((a.createdAt&&a.createdAt.seconds)||0)-((b.createdAt&&b.createdAt.seconds)||0));
-  tv.innerHTML=`<h3>${esc(c)}반 비평 (${all.length}개)</h3><div class="ctl"><button class="alt" id="ccsv">엑셀(CSV)로 내려받기</button></div>`+(all.length?all.map(w=>`<div class="card wk crt" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b><span class="hint">${esc(tmS(w.createdAt))}</span></div><p><b>비평 작품</b> ${esc(w.work)}</p><p><b>비평 대상</b> ${esc(w.target)}</p><p class="ctext">${esc(w.text)}</p><div class="ctl"><button class="alt" data-x="1">삭제</button></div></div>`).join(''):'<p class="hint">아직 제출한 비평이 없어요.</p>');
-  $('#ccsv').onclick=()=>dl(c+'반_비평_'+new Date().toISOString().slice(0,10)+'.csv',[['반','구분','번호','비평 작품','비평 대상','비평 내용','제출시각'],...all.map(w=>[c,w.type==='group'?'모둠':'개인',w.no,w.work,w.target,w.text,tmS(w.createdAt)])].map(r=>r.map(qv).join(',')).join('\r\n'));
+  all=all.filter(w=>['solo','group'].includes(w.type)).sort((a,b)=>a.no-b.no||((a.createdAt&&a.createdAt.seconds)||0)-((b.createdAt&&b.createdAt.seconds)||0));
+  tv.innerHTML=`<h3>${esc(c)}반 비평 (${all.length}개)</h3><div class="ctl"><button class="alt" id="ccsv">엑셀(CSV)로 내려받기</button></div>`+(all.length?all.map(w=>`<div class="card wk crt" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b>${w.group?`<span class="badge">${esc(w.group)}모둠 소속</span>`:''}<span class="hint">${esc(tmS(w.createdAt))}</span></div><p><b>발표한 대상</b> ${w.targetType==='solo'?'개인':w.targetType==='group'?'모둠':'-'}</p><p><b>비평 작품</b> ${esc(w.work)}</p><p><b>비평 대상</b> ${esc(w.target)}</p><p class="ctext">${esc(w.text)}</p><div class="ctl"><button class="alt" data-x="1">삭제</button></div></div>`).join(''):'<p class="hint">아직 제출한 비평이 없어요.</p>');
+  $('#ccsv').onclick=()=>dl(c+'반_비평_'+new Date().toISOString().slice(0,10)+'.csv',[['반','구분','번호','소속 모둠','발표한 대상','비평 작품','비평 대상','비평 내용','제출시각'],...all.map(w=>[c,w.type==='group'?'모둠':'개인',w.no,w.group||'',w.targetType==='solo'?'개인':w.targetType==='group'?'모둠':'',w.work,w.target,w.text,tmS(w.createdAt)])].map(r=>r.map(qv).join(',')).join('\r\n'));
   tv.querySelectorAll('.crt').forEach(el=>el.querySelector('[data-x]').onclick=async()=>{if(!confirm('이 비평을 삭제할까요?'))return;try{await F.deleteCritique(el.dataset.id);showCrit(F,c)}catch(e){alert(errMsg(e,'t'))}});
   tv.scrollIntoView({behavior:'smooth'})}
 
 /* ----- QR로 들어온 학생: 반 정보 기억 ----- */
 (function(){const p=new URLSearchParams(location.search),c=p.get('class'),k=p.get('key'),gq=parseInt(p.get('g'),10);
   if(c&&k&&/^[A-Za-z0-9_-]{1,20}$/.test(c)&&/^[A-Za-z0-9]{4,40}$/.test(k)){
-    const jj={classCode:c,key:k};if(gq>=1&&gq<=30){jj.group=gq;lsSet('cajon-type','group');lsSet('cajon-gno',gq)}lsSet('cajon-join',jj);
+    const jj={classCode:c,key:k};if(gq>=1&&gq<=30){jj.group=gq;lsSet('cajon-type','group');lsSet('cajon-gno',gq)}else lsSet('cajon-type','solo');lsSet('cajon-join',jj);
     try{history.replaceState(null,'',location.pathname+(location.hash||'#/make'))}catch(e){}}})();
 
 /* 연습곡 악보: images 폴더에서 이름이 맞는 이미지를 찾아 <img>로 보여 줘요. 대소문자와 확장자가 달라도 찾아요. */
@@ -423,7 +421,7 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1029-c</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1029-d</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};
