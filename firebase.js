@@ -63,7 +63,8 @@ window.FB = {
   // ----- 학생: 작품 저장 -----
   // 개인(solo): 같은 기기·반·번호·박자는 한 문서를 덮어써요.
   // 모둠(group): 같은 반·모둠 번호·박자는 한 문서를 모둠 친구들이 함께 덮어써요.
-  async saveCreation({ type, classCode, no, joinKey, beats, measures = 1, title = "", fill, cells, submit }) {
+  async saveCreation({ type, classCode, no, joinKey, beats, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, submit }) {
+    const extra = arr ? { bars, arr, dyn, spd } : {};
     const u = await ensureSignedIn();
     const id = idOf(u.uid, { type, classCode, no, beats, measures });
     const ref = doc(db, "creations", id);
@@ -75,14 +76,27 @@ window.FB = {
       if (snap.data().submitted === true) {
         throw Object.assign(new Error("submitted"), { code: "submitted" });
       }
-      await updateDoc(ref, { uid: u.uid, joinKey, fill, cells, title, measures, updatedAt: serverTimestamp(), ...sub });
+      await updateDoc(ref, { uid: u.uid, joinKey, fill, cells, title, measures, ...extra, updatedAt: serverTimestamp(), ...sub });
     } else {
       await setDoc(ref, {
-        uid: u.uid, type, classCode, no, joinKey, beats, measures, title, fill, cells,
+        uid: u.uid, type, classCode, no, joinKey, beats, measures, title, fill, cells, ...extra,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...sub
       });
     }
   },
+
+  // ----- 비평 -----
+  async saveCritique({ type, classCode, no, joinKey, work, target, text }) {
+    const u = await ensureSignedIn();
+    await setDoc(doc(collection(db, "critiques")), {
+      uid: u.uid, type, classCode, no, joinKey, work, target, text, createdAt: serverTimestamp()
+    });
+  },
+  async listCritiques(code) {
+    const s = await getDocs(query(collection(db, "critiques"), where("classCode", "==", code)));
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  deleteCritique(id) { return deleteDoc(doc(db, "critiques", id)); },
 
   // ----- 선생님: 반 관리 -----
   async listClasses() {

@@ -142,3 +142,13 @@ ul.boxed{background:var(--card);border:1px solid var(--line);border-radius:12px;
 .fig img.photo{display:block;width:100%;max-width:560px;height:auto;margin:0 auto;border-radius:14px;background:#fff}
 
 .ver{text-align:center;font-size:.72rem;color:var(--mute);opacity:.7;margin:18px 0 10px}
+
+.mrow{display:grid;grid-template-columns:3.6em repeat(3,minmax(0,1fr));gap:6px;align-items:center;padding:4px 6px;border-radius:10px;margin-bottom:4px}
+.mrow.h{font-size:.8rem;color:var(--mute);font-weight:700}
+.mrow.on{background:rgba(42,157,143,.22)}
+.mrow select{font:inherit;font-size:.88rem;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 4px;width:100%}
+.arrv{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.sc{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem}
+.crt p{margin:6px 0}.crt .ctext{white-space:pre-wrap}
+.fbg input[type=text]{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;width:100%;box-sizing:border-box}
+.fbg .cm{align-items:flex-start;flex-direction:column}
