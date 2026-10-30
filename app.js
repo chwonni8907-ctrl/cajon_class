@@ -126,9 +126,10 @@ function initCreate(){sel='';const s0=lsGet('cajon-size');
   $('#nb').value=(loadArr(),bars);$('#nb').onchange=e=>{bars=+e.target.value;fitArr(arr,dyn,spd);saveArr();renderArr();renderSave()};
   $('#ps').onclick=playSong;
   loadPats();renderCreate();renderArr();renderSave()}
+function pv(a){const L=LB[sz],gap=sz/4,tk=barToks(pats.B,pats.V,pats.F,a,sz);return `<div class="mpv cg one" style="grid-template-columns:repeat(${sz},minmax(0,1fr))">`+tk.map((t,k)=>`<div class="cc${k%gap===0?' b':''}${a===2&&k>=sz*3/4?' fi':''}"><div class="l">${L[k]}</div><div class="slot${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`).join('')+'</div>'}
 function renderArr(){const sl=(f,list,v,i)=>`<select data-f="${f}" data-i="${i}" aria-label="${i+1}마디 ${f==='arr'?'리듬':f==='dyn'?'셈여림':'빠르기'}">${list.map((n,x)=>`<option value="${x}"${x===v?' selected':''}>${n}</option>`).join('')}</select>`;
-  $('#arr').innerHTML=`<div class="mrow h"><span></span><span>리듬</span><span>셈여림</span><span>빠르기</span></div>`+arr.map((a,i)=>`<div class="mrow" data-m="${i}"><b>${i+1}마디</b>${sl('arr',['기본','변형','필인'],a,i)}${sl('dyn',DYN,dyn[i],i)}${sl('spd',SPD,spd[i],i)}</div>`).join('');
-  document.querySelectorAll('#arr select').forEach(e=>e.onchange=()=>{const i=+e.dataset.i,f=e.dataset.f;({arr,dyn,spd})[f][i]=+e.value;saveArr()})}
+  $('#arr').innerHTML=`<div class="mrow h"><span></span><span>리듬</span><span>셈여림</span><span>빠르기</span></div>`+arr.map((a,i)=>`<div class="mrow" data-m="${i}"><b>${i+1}마디</b>${sl('arr',['기본','변형','필인'],a,i)}${sl('dyn',DYN,dyn[i],i)}${sl('spd',SPD,spd[i],i)}</div>${pv(a)}`).join('');
+  document.querySelectorAll('#arr select').forEach(e=>e.onchange=()=>{const i=+e.dataset.i,f=e.dataset.f;({arr,dyn,spd})[f][i]=+e.value;saveArr();renderArr()})}
 function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,isF=pk==='F',ff=sz*3/4;let h='';
   $('#tip').textContent=TIPS[sz]+' 지금은 「'+PN[pk]+'」 1마디를 만들고 있어요.'+(pk==='V'?' 기본 리듬을 불러왔어요. 한두 칸만 바꿔 보세요.':isF?' 필인은 4박(마지막 박)에 만들어요. 1~3박(흐리게 보이는 칸)은 기본 리듬이 그대로 연주돼요.':'');
   document.querySelectorAll('#pt .seg-b').forEach(b=>b.classList.toggle('on',b.dataset.p===pk));
@@ -141,7 +142,7 @@ function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,isF=pk==='F',ff=sz*3/
   document.querySelectorAll('.slot[data-i]').forEach(e=>{const i=+e.dataset.i;
     e.onpointerdown=ev=>{if(cur[i])startDrag(ev,cur[i],i)};
     e.onclick=()=>{if(!cur[i]&&sel){cur[i]=sel;beep(sel);save();renderCreate()}}});
-  document.querySelectorAll('.tk').forEach(e=>e.classList.toggle('sel',e.dataset.t===sel))}
+  document.querySelectorAll('.tk').forEach(e=>e.classList.toggle('sel',e.dataset.t===sel));if($('#arr'))renderArr()}
 function startDrag(e,tok,from){e.preventDefault();const g=document.createElement('div');g.className='ghost';g.innerHTML=SYM(tok[0],tok[1]);document.body.appendChild(g);
   drag={tok,from,g,x:e.clientX,y:e.clientY,moved:false};mv(e);addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up)}
 function mv(e){const d=drag;d.g.style.left=e.clientX+'px';d.g.style.top=e.clientY+'px';if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>8)d.moved=true}
@@ -422,7 +423,7 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1029-b</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1029-c</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};
