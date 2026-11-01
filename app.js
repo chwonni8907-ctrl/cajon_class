@@ -502,7 +502,7 @@ async function showCrit(F,c){const tv=$('#tv');tv.innerHTML='<p class="hint">불
 (function(){const p=new URLSearchParams(location.search),c=p.get('class'),k=p.get('key'),gq=parseInt(p.get('g'),10);
   if(c&&k&&/^[A-Za-z0-9_-]{1,20}$/.test(c)&&/^[A-Za-z0-9]{4,40}$/.test(k)){
     const jj={classCode:c,key:k};if(gq>=1&&gq<=30){jj.group=gq;lsSet('cajon-type','group');lsSet('cajon-gno',gq)}else lsSet('cajon-type','solo');lsSet('cajon-join',jj);
-    try{history.replaceState(null,'',location.pathname+(location.hash||'#/make'))}catch(e){}}})();
+    try{history.replaceState(null,'',location.pathname+(location.hash||''))}catch(e){}}})();
 
 /* 연습곡 악보: images 폴더에서 이름이 맞는 이미지를 찾아 <img>로 보여 줘요. 대소문자와 확장자가 달라도 찾아요. */
 function initScore(){const box=$('#scoreBox');if(!box)return;
@@ -528,7 +528,7 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1031-a</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1101-a</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};
