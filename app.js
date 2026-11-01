@@ -40,7 +40,7 @@ function goBack(){const id=curId(),par=parentOf(id);if(par===null)return;
 
 
 function padSection(){return `<h3>카혼 두드려 보기</h3><div class="card"><p class="hint" style="margin-top:0">화면의 카혼을 직접 두드려 보세요. 먼저 여기서 연습하고, 실제 카혼으로 연주해 보세요. 리듬을 ‘들어보기’ 하면 칠 자리가 깜빡여요.</p><svg class="pad" viewBox="0 0 220 200" role="group" aria-label="두드릴 수 있는 카혼"><rect x="30" y="20" width="160" height="160" rx="6" fill="#d9a35f" stroke="#7a4a17" stroke-width="3"/><rect x="38" y="28" width="144" height="144" rx="3" fill="#e8bb7c" stroke="#7a4a17"/><rect x="34" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="160" y="12" width="26" height="10" rx="2" fill="#333"/><rect x="26" y="180" width="168" height="16" rx="3" fill="#a9772e" stroke="#7a4a17" stroke-width="2"/><text x="110" y="192" text-anchor="middle" style="font-size:10px;fill:#fff;pointer-events:none">앉는 면 (연주자 쪽)</text><g class="z" data-k="B" tabindex="0" role="button" aria-label="베이스"><circle class="zs" cx="110" cy="84" r="26"/><text x="110" y="88" text-anchor="middle">베이스</text></g><g class="z" data-k="HL" tabindex="0" role="button" aria-label="슬랩 왼손"><rect class="zs" x="70" y="134" width="34" height="34"/><text x="87" y="154" text-anchor="middle" style="font-size:10px">슬랩</text><text x="87" y="164" text-anchor="middle" style="font-size:8px">L</text></g><g class="z" data-k="HR" tabindex="0" role="button" aria-label="슬랩 오른손"><rect class="zs" x="116" y="134" width="34" height="34"/><text x="133" y="154" text-anchor="middle" style="font-size:10px">슬랩</text><text x="133" y="164" text-anchor="middle" style="font-size:8px">R</text></g><g class="z" data-k="TL" tabindex="0" role="button" aria-label="핑거 왼손"><polygon class="zs" points="54,135 70,151 54,167 38,151"/><text x="54" y="151" text-anchor="middle" style="font-size:9px">핑거</text><text x="54" y="160" text-anchor="middle" style="font-size:8px">L</text></g><g class="z" data-k="TR" tabindex="0" role="button" aria-label="핑거 오른손"><polygon class="zs" points="166,135 182,151 166,167 150,151"/><text x="166" y="151" text-anchor="middle" style="font-size:9px">핑거</text><text x="166" y="160" text-anchor="middle" style="font-size:8px">R</text></g></svg><p class="hint" style="margin-bottom:0">연주자가 앉아서 내려다본 방향의 그림이에요. 그림 아래쪽이 연주자 쪽(앉는 면)이에요. 빨강 원은 베이스, 파랑 네모는 슬랩(세게), 노랑 다이아몬드는 핑거(약하게)예요.</p></div>`}
-function hit(k,z){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();snd(k[0]);z.classList.add('hit');setTimeout(()=>z.classList.remove('hit'),140)}
+function hit(k,z){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();snd(k);z.classList.add('hit');setTimeout(()=>z.classList.remove('hit'),140)}
 function flash(tk,keep){document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
   const key=tk[0]==='B'?'B':tk.slice(0,2);document.querySelectorAll('.z[data-k="'+key+'"]').forEach(z=>z.classList.add('cur'))}
 function ytId(v){v=String(v||'').trim();const m=v.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(v)?v:'')}
@@ -49,11 +49,12 @@ function video(id){
   return `<h3>수업 영상</h3><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${v}?rel=0&playsinline=1" title="수업 영상" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe></div>`;
 }
 function stopPlay(){clearInterval(timer);clearTimeout(timer);timer=null;playTok++;
-  document.querySelectorAll('.c.on,.slot.on,.mrow.on').forEach(e=>e.classList.remove('on'));const ps=document.querySelector('#ps');if(ps)ps.textContent='▶ 곡 전체 들어보기';document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
+  document.querySelectorAll('.c.on,.slot.on,.hl.on,.mrow.on').forEach(e=>e.classList.remove('on'));const ps=document.querySelector('#ps');if(ps)ps.textContent='▶ 곡 전체 들어보기';document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
   document.querySelectorAll('.pbx').forEach(b=>b.textContent=b.dataset.t||'▶ 들어보기');const b=$('#pb');if(b)b.textContent='▶ 들어보기'}
-function snd(k,v=1){const t=ac.currentTime;
-  if(k==='B'){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(55,t+.2);g.gain.setValueAtTime(.9*v,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.32)}
-  else{const T=k==='T',n=Math.floor(ac.sampleRate*.08),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=1800;g.gain.value=(T?.2:.6)*v;s.buffer=b;s.connect(f).connect(g).connect(ac.destination);s.start(t)}}
+function snd(k,v=1){const t=ac.currentTime,c=k[0],L=k[1]==='L',pn=ac.createStereoPanner?ac.createStereoPanner():null;
+  let out=ac.destination;if(pn){pn.pan.value=(L?-1:1)*(c==='B'?.2:.6);pn.connect(ac.destination);out=pn}
+  if(c==='B'){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(L?115:135,t);o.frequency.exponentialRampToValueAtTime(L?48:56,t+.2);g.gain.setValueAtTime(.9*v,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(out);o.start(t);o.stop(t+.32)}
+  else{const T=c==='T',n=Math.floor(ac.sampleRate*(T?.06:.08)),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type=T?'bandpass':'highpass';f.frequency.value=T?(L?2300:3600):(L?1500:2200);if(T)f.Q.value=1.2;g.gain.value=(T?(L?.4:.55):.6)*v;s.buffer=b;s.connect(f).connect(g).connect(out);s.start(t)}}
 let playTok=0,playing=null;
 async function togglePlay(n,bi){
   if(timer&&playing===bi){stopPlay();playing=null;return}
@@ -69,10 +70,12 @@ async function togglePlay(n,bi){
     document.querySelectorAll('.c.on').forEach(e=>e.classList.remove('on'));
     if(i>=steps.length){if(loop)i=0;else{stopPlay();playing=null;return}}
     const st=steps[i];st.c.classList.add('on');
-    if(st.tk!=='.'){snd(st.tk[0]);flash(st.tk)}else document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
+    if(st.tk!=='.'){snd(st.tk);flash(st.tk)}else document.querySelectorAll('.z.cur').forEach(z=>z.classList.remove('cur'));
     i++;timer=setTimeout(step,st.ms)};
   step()}
-function SYM(k,h){const sh=k==='B'?'<circle class="o fB" cx="20" cy="20" r="17"/>':k==='H'?'<rect class="o fH" x="3" y="3" width="34" height="34"/>':'<polygon class="o fT" points="20,2 38,20 20,38 2,20"/>';return `<svg class="sym" viewBox="0 0 40 40" role="img" aria-label="${k==='B'?'베이스':k==='H'?'슬랩':'핑거'}">${sh}${h?`<text x="20" y="27.5"${k==='T'?' style="fill:#1b1b1b"':''}>${h}</text>`:''}</svg>`}
+const symIn=(k,h)=>{const sh=k==='B'?'<circle class="o fB" cx="20" cy="20" r="17"/>':k==='H'?'<rect class="o fH" x="3" y="3" width="34" height="34"/>':'<polygon class="o fT" points="20,2 38,20 20,38 2,20"/>';return sh+(h?`<text x="20" y="27.5"${k==='T'?' style="fill:#1b1b1b"':''}>${h}</text>`:'')},symLab=k=>k==='B'?'베이스':k==='H'?'슬랩':'핑거';
+function SYM(k,h){return `<svg class="sym" viewBox="0 0 40 40" role="img" aria-label="${symLab(k)}">${symIn(k,h)}</svg>`}
+function SYMIN(k,h,x,y,z){return `<svg class="sym" x="${x}" y="${y}" width="${z}" height="${z}" viewBox="0 0 40 40" aria-hidden="true">${symIn(k,h)}</svg>`}
 function gridOne(n,b){const tk=b.p.split(' '),per=tk.length,beats=b.beats||n.beats,gap=Math.max(1,per/beats),lab=LB[per]||tk.map(()=>'');
   return `<div class="g" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`+tk.map((x,i)=>`<div class="c${i%gap===0?' b':''}"><div class="l">${lab[i]}</div>`+(x==='.'?`<div class="r">·</div>`:SYM(x[0],x[1]))+`</div>`).join('')+`</div>`}
 function grid(n){return n.bars.map(b=>`<div class="bar">${b.t?`<div class="bt">${b.t}</div>`:''}${gridOne(n,b)}</div>`).join('')}
@@ -100,39 +103,114 @@ function body(n){
 function menuHtml(n,cur){return '<ul>'+n.c.map(c=>`<li><a href="#/${c.id}" class="${c.c?'grp':''}${c.id===cur?' cur':''}">${c.t}</a>${c.c?menuHtml(c,cur):''}</li>`).join('')+'</ul>'}
 const TK=['BR','BL','HR','HL','TR','TL'],AC=window.AudioContext||window.webkitAudioContext,NM={B:'동그라미',H:'네모',T:'다이아몬드'};
 const TIPS={4:'숫자 아래에 칸이 한 칸씩 있어요. 한 박에 하나씩 소리를 골라 나만의 리듬을 만들어 보세요.',8:'숫자 아래에 칸이 두 칸씩 있어요. 숫자 칸은 박, n 칸은 박과 박 사이예요.',16:'숫자 아래에 칸이 네 칸씩 있어요. 한 박을 네 칸으로 나눠 채워 보세요.'};
-let cur=[],sel='',drag=null,sz=4,fl=0,mc=1,ttl='';
+let cur=[],sel='',drag=null,sz=4,fl=0,mc=1,ttl='',hand='R',vm='grid';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-const PN={B:'기본 리듬',V:'변형 리듬',F:'필인'},PK=['B','V','F'],DYN=['여리게','보통','세게'],DV=[.5,1,1.35],SPD=['느리게','보통','빠르게'],SV=[.75,1,1.3];
-let pats={B:[],V:[],F:[]},pk='B',bars=8,arr=[],dyn=[],spd=[];
-function createHtml(){return `<div class="card ttl"><label>곡 제목 <input id="ct" type="text" maxlength="40" placeholder="곡 제목을 적어요" autocomplete="off"></label></div><h3>1단계 · 리듬 3개 만들기</h3><p class="hint" style="margin-top:0">곡에 어울리는 리듬을 1마디씩 만들어요. <b>기본 리듬</b>은 곡의 바탕, <b>변형 리듬</b>은 기본 리듬을 살짝 바꾼 것, <b>필인</b>은 흐름을 바꾸거나 마무리하는 리듬이에요.</p><div class="cbar"><select id="sz" aria-label="비트 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><span class="seg" id="pt" role="group" aria-label="만들 리듬 고르기" style="grid-column:span 2">${PK.map(k=>`<button class="seg-b" data-p="${k}">${PN[k]}</button>`).join('')}</span></div><p id="tip"></p><div class="card"><div id="cg"></div><div class="ctl"><button id="pb">▶ 이 리듬 들어보기</button><button class="alt" id="clr">이 리듬 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0">아이콘을 빈 칸으로 끌어다 놓아 보세요. 아이콘을 누른 뒤 칸을 눌러도 돼요. 같은 아이콘을 여러 번 쓸 수 있어요. 칸의 아이콘을 누르면 지워지고, 다른 칸으로 끌면 옮길 수 있어요.</p></div><h3>2단계 · 곡 구성하기</h3><div class="card"><div class="ctl"><label>곡의 마디 수 <select id="nb" aria-label="곡의 마디 수">${Array.from({length:13},(_,i)=>`<option value="${i+4}">${i+4}마디</option>`).join('')}</select></label></div><p class="hint">마디마다 어떤 리듬을 칠지, 얼마나 세게(셈여림), 얼마나 빠르게(빠르기) 칠지 골라요.</p><div id="arr"></div><div class="ctl"><button id="ps">▶ 곡 전체 들어보기</button><label>기본 빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label></div></div><h3>작품 저장과 제출</h3><div class="card" id="sv"></div>`}
-const ckey=()=>'cajon-v2-'+sz;
-const barToks=(B,V,F,a,n)=>{const P=a===1?V:a===2?F:B;return a===2?P.map((t,k)=>k<n*3/4?B[k]:t):P.slice()};
-function loadPats(){const v=lsGet(ckey());PK.forEach(k=>{const a=v&&v[k];pats[k]=Array.isArray(a)&&a.length===sz?a.map(x=>TK.includes(x)?x:''):Array(sz).fill('')});for(let k=0;k<sz*3/4;k++)pats.F[k]='';cur=pats[pk]}
+const PK=['B','V1','V2','V3','F'],PN={B:'기본 리듬',V1:'변형 리듬 1',V2:'변형 리듬 2',V3:'변형 리듬 3',F:'필인'},TAB={B:'기본',V1:'변형 1',V2:'변형 2',V3:'변형 3',F:'필인'},DYN=['여리게','보통','세게'],DV=[.5,1,1.35],SPD=['느리게','보통','빠르게'],SV=[.75,1,1.3];
+let note='',pats={B:[],V1:[],V2:[],V3:[],F:[]},pk='B',bars=8,arr=[],dyn=[],spd=[];
+/* ----- 1단계: 곡 분석 상태 ----- */
+const FORMS=['intro','verse','pre-chorus','chorus','bridge','outro'];
+const s0=(x,n)=>String(x==null?'':x).slice(0,n);
+const anaNew=()=>({mood:'',meter:0,tempo:0,mode:0,forms:FORMS.map(()=>({h:0,p:''})),flow:[0,1,2].map(()=>({p:'',k:0,r:'',d:'',s:''})),sum:''});
+let ana=anaNew(),src='',srcFile=null,pendFile=null;
+function loadAna(){const v=lsGet('cajon-ana');ana=anaNew();
+  if(v&&typeof v==='object'){ana.mood=s0(v.mood,60);ana.meter=[2,3,4].includes(v.meter)?v.meter:0;ana.tempo=[1,2,3].includes(v.tempo)?v.tempo:0;ana.mode=[1,2].includes(v.mode)?v.mode:0;ana.sum=s0(v.sum,200);
+    FORMS.forEach((_,i)=>{const f=v.forms&&v.forms[i];if(f)ana.forms[i]={h:[1,2].includes(f.h)?f.h:0,p:s0(f.p,60)}});
+    [0,1,2].forEach(i=>{const f=v.flow&&v.flow[i];if(f)ana.flow[i]={p:s0(f.p,60),k:[1,2].includes(f.k)?f.k:0,r:s0(f.r,100),d:s0(f.d,100),s:s0(f.s,100)}})}
+  src=s0(lsGet('cajon-src'),300);const sf=lsGet('cajon-srcfile');srcFile=sf&&typeof sf.name==='string'&&typeof sf.path==='string'?{name:s0(sf.name,100),path:s0(sf.path,200)}:null}
+const saveAna=()=>lsSet('cajon-ana',ana);
+function normSrc(v){v=String(v||'').trim();if(!v)return '';if(!/^[a-z][a-z0-9+.-]*:\/\//i.test(v))v='https://'+v;return /^https?:\/\/\S+$/i.test(v)?v.slice(0,300):null}
+function anaHtml(){
+  const seg=(key,list,lab)=>`<span class="seg" role="group" aria-label="${lab}">${list.map(([v,t])=>`<button type="button" class="seg-b" data-sg="${key}" data-v="${v}">${t}</button>`).join('')}</span>`;
+  return `<div class="card ttl"><label>곡 제목 <input id="ct" type="text" maxlength="40" placeholder="곡 제목을 적어요" autocomplete="off"></label>
+<label class="ci" style="margin-top:10px">악곡 링크 (유튜브나 음원 사이트 주소) <input id="sl" type="url" maxlength="300" placeholder="https://" autocomplete="off" inputmode="url"></label>
+<div class="ci" style="margin-top:10px"><span>악곡 파일 첨부 <small class="hint">음원, 악보 사진, PDF · 20MB까지</small></span><input id="sf" type="file" accept="audio/*,image/*,application/pdf"><p class="hint" id="sfs" style="margin:.2rem 0 0"></p></div></div>
+<div class="card"><label class="ci">곡의 분위기 (예: 신나는, 차분한, 웅장한) <input id="am" type="text" maxlength="60" autocomplete="off"></label>
+<p class="hint" style="margin:10px 0 4px">음악을 들으며 알맞은 것을 골라요. 다시 누르면 선택이 풀려요.</p>
+<div class="arow"><b>박자</b>${seg('meter',[[2,'2박'],[3,'3박'],[4,'4박']],'박자')}</div>
+<div class="arow"><b>빠르기</b>${seg('tempo',[[1,'빠르다'],[2,'보통'],[3,'느리다']],'빠르기')}</div>
+<div class="arow"><b>조성</b>${seg('mode',[[1,'밝다'],[2,'어둡다']],'조성')}</div></div>
+<h4 class="sec">곡의 흐름에 따른 형식</h4><p class="hint" style="margin-top:0">이 곡에 있는 부분을 골라 어디에 있는지 적어요. (예: 0:00~0:20)</p>
+<div class="card">${FORMS.map((n,i)=>`<div class="frow"><b>${n}</b><select data-fh="${i}" aria-label="${n} 있음 없음"><option value="0">-</option><option value="1">있다</option><option value="2">없다</option></select><input type="text" data-fp="${i}" maxlength="60" placeholder="위치" aria-label="${n} 위치" autocomplete="off"></div>`).join('')}</div>
+<h4 class="sec">이완과 긴장 찾기</h4><p class="hint" style="margin-top:0">이완은 편안하고 느슨한 부분, 긴장은 고조되고 팽팽한 부분이에요. 그 부분에서 리듬, 셈여림, 빠르기가 어떻게 달라지는지 써요.</p>
+<div class="card">${[0,1,2].map(i=>`<div class="flrow"><div class="flh"><b>${i+1}</b><input type="text" data-fl="${i}" data-k="p" maxlength="60" placeholder="부분 (형식 이름이나 위치)" aria-label="${i+1}번 부분" autocomplete="off"><select data-fk="${i}" aria-label="${i+1}번 이완 긴장"><option value="0">-</option><option value="1">이완</option><option value="2">긴장</option></select></div><input type="text" data-fl="${i}" data-k="r" maxlength="100" placeholder="리듬의 변화" aria-label="${i+1}번 리듬의 변화" autocomplete="off"><input type="text" data-fl="${i}" data-k="d" maxlength="100" placeholder="셈여림의 변화" aria-label="${i+1}번 셈여림의 변화" autocomplete="off"><input type="text" data-fl="${i}" data-k="s" maxlength="100" placeholder="빠르기의 변화" aria-label="${i+1}번 빠르기의 변화" autocomplete="off"></div>`).join('')}</div>
+<div class="card"><label class="ci">이 곡의 흐름을 한 문장으로 정리해요 <textarea id="asum" rows="2" maxlength="200" placeholder="예: 이 곡은 verse에서 느슨하게 시작해 chorus에서 팽팽해진다."></textarea></label></div>`}
+function createHtml(){return `<h3>1단계 · 곡 분석하기</h3><p class="hint" style="margin-top:0">리듬을 만들기 전에 곡을 먼저 들어요. 곡의 제목과 분위기, 형식, 이완과 긴장을 살펴 곡의 흐름을 파악해요.</p>${anaHtml()}
+<h3>2단계 · 리듬 창작하기</h3><p class="hint" style="margin-top:0">곡의 흐름에 어울리는 리듬을 1마디씩 만들어요. <b>기본 리듬</b>은 곡의 바탕, <b>변형 리듬</b>은 기본 리듬을 한두 칸 바꾼 것(세 개까지), <b>필인</b>은 4박에서 흐름을 바꾸거나 마무리하는 리듬이에요.</p><div class="cbar"><select id="sz" aria-label="비트 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><span class="seg" id="vm" role="group" aria-label="리듬을 놓는 방법" style="grid-column:span 2"><button type="button" class="seg-b" data-v="grid">칸에 놓기</button><button type="button" class="seg-b" data-v="staff">오선에 놓기</button></span></div><div class="ptabs"><span class="seg" id="pt" role="group" aria-label="만들 리듬 고르기">${PK.map(k=>`<button type="button" class="seg-b" data-p="${k}">${TAB[k]}</button>`).join('')}</span></div><p id="tip"></p><div class="card"><div class="ctl hand" id="hd" hidden><b>손</b><span class="seg" role="group" aria-label="손 고르기"><button type="button" class="seg-b" data-h="R">오른손 R</button><button type="button" class="seg-b" data-h="L">왼손 L</button></span></div><div id="cg"></div><div class="ctl"><button id="pb">▶ 이 리듬 들어보기</button><button class="alt" id="clr">이 리듬 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0" id="paltip"></p></div><div class="card"><label class="ci">바꾼 까닭 (창작 의도) <textarea id="cn" rows="4" maxlength="300" placeholder="예: 변형 리듬 1은 3박의 슬랩을 베이스로 바꿔서 더 묵직하게 만들었어요. 필인은 곡이 끝나는 느낌이 나도록 4박을 빠르게 채웠어요."></textarea></label><p class="hint" style="margin-bottom:0">기본 리듬에서 무엇을 어떻게 바꿨는지, 왜 그렇게 했는지 한 줄로 써요. ~를 ~로 바꾸어 ~한 느낌을 냈다. (300자까지)</p></div>
+<h3>3단계 · 곡 구성하기</h3><div class="card"><div class="ctl"><label>곡의 마디 수 <select id="nb" aria-label="곡의 마디 수">${Array.from({length:13},(_,i)=>`<option value="${i+4}">${i+4}마디</option>`).join('')}</select></label></div><p class="hint">마디마다 어떤 리듬을 칠지, 얼마나 세게(셈여림), 얼마나 빠르게(빠르기) 칠지 골라요. 처음에는 8마디를 권해요.</p><div id="arr"></div><div class="ctl"><button id="ps">▶ 곡 전체 들어보기</button><label>기본 빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label></div></div><h3>작품 저장과 제출</h3><div class="card" id="sv"></div>`}
+const ckey=()=>'cajon-v3-'+sz;
+const barToks=(pt,key,n)=>{const P=pt[key]||[];return key==='F'?P.map((t,k)=>k<n*3/4?pt.B[k]:t):P.slice()};
+function loadPats(){let v=lsGet(ckey());if(!v){const o=lsGet('cajon-v2-'+sz);if(o)v={B:o.B,V1:o.V,F:o.F}}
+  PK.forEach(k=>{const a=v&&v[k];pats[k]=Array.isArray(a)&&a.length===sz?a.map(x=>TK.includes(x)?x:''):Array(sz).fill('')});for(let k=0;k<sz*3/4;k++)pats.F[k]='';cur=pats[pk]}
 function save(){lsSet(ckey(),pats)}
-function loadArr(){const v=lsGet('cajon-v2-arr')||{};bars=(v.bars>=4&&v.bars<=16)?v.bars:8;fitArr(v.arr,v.dyn,v.spd)}
-function fitArr(a,d,p){arr=[];dyn=[];spd=[];for(let i=0;i<bars;i++){arr.push([0,1,2].includes(a&&a[i])?a[i]:0);dyn.push([0,1,2].includes(d&&d[i])?d[i]:1);spd.push([0,1,2].includes(p&&p[i])?p[i]:1)}}
-function saveArr(){lsSet('cajon-v2-arr',{bars,arr,dyn,spd})}
-function beep(t){ac=ac||new AC();ac.resume();snd(t[0])}
-function initCreate(){sel='';const s0=lsGet('cajon-size');
-  sz=[4,8,16].includes(s0)?s0:4;mc=3;fl=0;ttl=lsGet('cajon-title')||'';
+function loadArr(){let v=lsGet('cajon-v3-arr');if(!v){const o=lsGet('cajon-v2-arr');if(o&&Array.isArray(o.arr))v={bars:o.bars,arr:o.arr.map(x=>x===2?4:x),dyn:o.dyn,spd:o.spd}}v=v||{};bars=(v.bars>=4&&v.bars<=16)?v.bars:8;fitArr(v.arr,v.dyn,v.spd)}
+function fitArr(a,d,p){arr=[];dyn=[];spd=[];for(let i=0;i<bars;i++){arr.push([0,1,2,3,4].includes(a&&a[i])?a[i]:0);dyn.push([0,1,2].includes(d&&d[i])?d[i]:1);spd.push([0,1,2].includes(p&&p[i])?p[i]:1)}}
+function saveArr(){lsSet('cajon-v3-arr',{bars,arr,dyn,spd})}
+function beep(t){ac=ac||new AC();ac.resume();snd(t)}
+function initAna(){loadAna();
+  $('#sl').value=src;$('#am').value=ana.mood;$('#asum').value=ana.sum;
+  const paint=()=>document.querySelectorAll('[data-sg]').forEach(b=>b.classList.toggle('on',ana[b.dataset.sg]===+b.dataset.v));paint();
+  document.querySelectorAll('[data-sg]').forEach(b=>b.onclick=()=>{const k=b.dataset.sg,v=+b.dataset.v;ana[k]=ana[k]===v?0:v;saveAna();paint()});
+  $('#am').oninput=e=>{ana.mood=s0(e.target.value,60);saveAna()};
+  $('#asum').oninput=e=>{ana.sum=s0(e.target.value,200);saveAna()};
+  document.querySelectorAll('[data-fh]').forEach(e=>{e.value=ana.forms[+e.dataset.fh].h;e.onchange=()=>{ana.forms[+e.dataset.fh].h=+e.value;saveAna()}});
+  document.querySelectorAll('[data-fp]').forEach(e=>{e.value=ana.forms[+e.dataset.fp].p;e.oninput=()=>{ana.forms[+e.dataset.fp].p=s0(e.value,60);saveAna()}});
+  document.querySelectorAll('[data-fk]').forEach(e=>{e.value=ana.flow[+e.dataset.fk].k;e.onchange=()=>{ana.flow[+e.dataset.fk].k=+e.value;saveAna()}});
+  document.querySelectorAll('[data-fl]').forEach(e=>{const i=+e.dataset.fl,k=e.dataset.k;e.value=ana.flow[i][k];e.oninput=()=>{ana.flow[i][k]=s0(e.value,k==='p'?60:100);saveAna()}});
+  $('#sl').oninput=e=>{src=s0(e.target.value,300);lsSet('cajon-src',src)};
+  const stat=()=>{const m=$('#sfs');if(!m)return;m.textContent=pendFile?'선택한 파일: '+pendFile.name+' (저장하거나 제출할 때 올라가요)':srcFile?'올린 파일: '+srcFile.name:''};stat();
+  $('#sf').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f){pendFile=null;stat();return}
+    if(f.size>20*1024*1024){$('#sfs').textContent='파일이 너무 커요. 20MB 이하로 골라 주세요.';e.target.value='';pendFile=null;return}
+    pendFile=f;stat()}}
+function initCreate(){sel='';const s1=lsGet('cajon-size');
+  sz=[4,8,16].includes(s1)?s1:4;mc=5;fl=0;ttl=lsGet('cajon-title')||'';vm=lsGet('cajon-vm')==='staff'?'staff':'grid';
   $('#sz').value=sz;$('#ct').value=ttl;
   $('#pal').innerHTML=TK.map(t=>`<div class="tk" data-t="${t}" role="button" aria-label="${NM[t[0]]} ${t[1]}">${SYM(t[0],t[1])}</div>`).join('');
   document.querySelectorAll('.tk').forEach(e=>e.onpointerdown=ev=>startDrag(ev,e.dataset.t,null));
+  initAna();
   $('#sz').onchange=e=>{sz=+e.target.value;lsSet('cajon-size',sz);loadPats();renderCreate()};
-  document.querySelectorAll('#pt .seg-b').forEach(b=>b.onclick=()=>{pk=b.dataset.p;if(pk==='V'&&!pats.V.some(x=>x)&&pats.B.some(x=>x)){pats.V=pats.B.slice();save()}cur=pats[pk];sel='';renderCreate()});
+  document.querySelectorAll('#pt .seg-b').forEach(b=>b.onclick=()=>{pk=b.dataset.p;if(pk[0]==='V'&&!pats[pk].some(x=>x)&&pats.B.some(x=>x)){pats[pk]=pats.B.slice();save()}cur=pats[pk];sel='';renderCreate()});
+  document.querySelectorAll('#vm .seg-b').forEach(b=>b.onclick=()=>{vm=b.dataset.v;lsSet('cajon-vm',vm);renderCreate()});
+  document.querySelectorAll('#hd .seg-b').forEach(b=>b.onclick=()=>{hand=b.dataset.h;sel='';renderCreate()});
   $('#ct').oninput=e=>{ttl=e.target.value;lsSet('cajon-title',ttl)};
+  note=lsGet('cajon-note')||'';$('#cn').value=note;$('#cn').oninput=e=>{note=e.target.value;lsSet('cajon-note',note)};
   $('#clr').onclick=()=>{pats[pk].fill('');save();renderCreate()};
   $('#nb').value=(loadArr(),bars);$('#nb').onchange=e=>{bars=+e.target.value;fitArr(arr,dyn,spd);saveArr();renderArr();renderSave()};
   $('#ps').onclick=playSong;
   loadPats();renderCreate();renderArr();renderSave()}
-function pv(a){const L=LB[sz],gap=sz/4,tk=barToks(pats.B,pats.V,pats.F,a,sz);return `<div class="mpv cg one" style="grid-template-columns:repeat(${sz},minmax(0,1fr))">`+tk.map((t,k)=>`<div class="cc${k%gap===0?' b':''}${a===2&&k>=sz*3/4?' fi':''}"><div class="l">${L[k]}</div><div class="slot${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`).join('')+'</div>'}
+function pv(a){const L=LB[sz],gap=sz/4,key=PK[a],tk=barToks(pats,key,sz);return `<div class="mpv cg one" style="grid-template-columns:repeat(${sz},minmax(0,1fr))">`+tk.map((t,k)=>`<div class="cc${k%gap===0?' b':''}${key==='F'&&k>=sz*3/4?' fi':''}"><div class="l">${L[k]}</div><div class="slot${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`).join('')+'</div>'}
 function renderArr(){const sl=(f,list,v,i)=>`<select data-f="${f}" data-i="${i}" aria-label="${i+1}마디 ${f==='arr'?'리듬':f==='dyn'?'셈여림':'빠르기'}">${list.map((n,x)=>`<option value="${x}"${x===v?' selected':''}>${n}</option>`).join('')}</select>`;
-  $('#arr').innerHTML=`<div class="mrow h"><span></span><span>리듬</span><span>셈여림</span><span>빠르기</span></div>`+arr.map((a,i)=>`<div class="mrow" data-m="${i}"><b>${i+1}마디</b>${sl('arr',['기본','변형','필인'],a,i)}${sl('dyn',DYN,dyn[i],i)}${sl('spd',SPD,spd[i],i)}</div>${pv(a)}`).join('');
+  $('#arr').innerHTML=`<div class="mrow h"><span></span><span>리듬</span><span>셈여림</span><span>빠르기</span></div>`+arr.map((a,i)=>`<div class="mrow" data-m="${i}"><b>${i+1}마디</b>${sl('arr',PK.map(k=>TAB[k]),a,i)}${sl('dyn',DYN,dyn[i],i)}${sl('spd',SPD,spd[i],i)}</div>${pv(a)}`).join('');
   document.querySelectorAll('#arr select').forEach(e=>e.onchange=()=>{const i=+e.dataset.i,f=e.dataset.f;({arr,dyn,spd})[f][i]=+e.value;saveArr();renderArr()})}
-function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,isF=pk==='F',ff=sz*3/4;let h='';
-  $('#tip').textContent=TIPS[sz]+' 지금은 「'+PN[pk]+'」 1마디를 만들고 있어요.'+(pk==='V'?' 기본 리듬을 불러왔어요. 한두 칸만 바꿔 보세요.':isF?' 필인은 4박(마지막 박)에 만들어요. 1~3박(흐리게 보이는 칸)은 기본 리듬이 그대로 연주돼요.':'');
+/* 오선: 위=핑거, 가운데=슬랩, 아래=베이스 */
+const SY={T:27,H:48,B:69};
+function staffSvg(){const L=LB[sz],gap=sz/4,cw=sz===4?74:sz===8?46:30,x0=58,W=x0+sz*cw+14,isF=pk==='F',ff=sz*3/4,ys=[20,34,48,62,76];
+  let g='',n='',h='',lab='',b='',nt=[];
+  for(let k=0;k<sz;k++){const cx=x0+k*cw+cw/2,gh=isF&&k<ff,t=gh?pats.B[k]:cur[k];
+    g+=`<rect class="hl" x="${x0+k*cw}" y="2" width="${cw}" height="92"/>`;
+    if(k%gap===0){g+=`<line class="stf-b" x1="${x0+k*cw}" x2="${x0+k*cw}" y1="12" y2="84"/>`}
+    lab+=`<text class="stf-l" x="${cx}" y="108">${L[k]}</text>`;
+    if(isF&&k===ff)lab+=`<text class="stf-f" x="${x0+k*cw}" y="124">필인</text>`;
+    if(!t)n+=`<circle class="stf-r" cx="${cx}" cy="48" r="1.8"/>`;
+    nt.push(t&&TK.includes(t)?{k,cx,t,gh}:null);
+    if(!gh){const x=x0+k*cw;h+=`<rect class="sp" data-i="${k}" data-r="T" x="${x}" y="6" width="${cw}" height="32"/><rect class="sp" data-i="${k}" data-r="H" x="${x}" y="38" width="${cw}" height="20"/><rect class="sp" data-i="${k}" data-r="B" x="${x}" y="58" width="${cw}" height="34"/>`}}
+  nt.forEach(o=>{if(!o)return;const y=SY[o.t[0]],sx=o.cx+8;n+=`<g class="${o.gh?'stf-gh':''}"><line class="stf-s" x1="${sx}" x2="${sx}" y1="${y}" y2="8"/>${SYMIN(o.t[0],o.t[1],o.cx-10,y-10,20)}</g>`});
+  const lvl=sz===16?2:sz===8?1:0;
+  for(let q=0;q<sz;q+=gap){let run=[];const fl=()=>{if(run.length>1){for(let l=0;l<lvl;l++){for(let r=0;r<run.length-1;r++){if(l===1&&run[r+1]-run[r]>1)continue;const x1=x0+run[r]*cw+cw/2+8,x2=x0+run[r+1]*cw+cw/2+8;b+=`<line class="stf-m" x1="${x1}" x2="${x2}" y1="${8+l*6}" y2="${8+l*6}"/>`}}}else if(run.length===1&&lvl){const x=x0+run[0]*cw+cw/2+8;b+=`<path class="stf-fg" d="M${x} 8 q7 3 6 12"/>`}run=[]};
+    for(let k=q;k<q+gap;k++){if(nt[k])run.push(k);else fl()}fl()}
+  return `<svg class="stf" style="min-width:${sz===16?640:sz===8?400:0}px" viewBox="0 0 ${W} ${isF?130:114}" role="group" aria-label="오선에 리듬 놓기">${g}${ys.map(y=>`<line class="stf-ln" x1="8" x2="${W-6}" y1="${y}" y2="${y}"/>`).join('')}<rect class="stf-c" x="22" y="34" width="4" height="28"/><rect class="stf-c" x="31" y="34" width="4" height="28"/><line class="stf-bl" x1="${x0}" x2="${x0}" y1="20" y2="76"/><line class="stf-bl" x1="${W-8}" x2="${W-8}" y1="20" y2="76"/>${n}${b}${lab}${h}</svg>`}
+function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,isF=pk==='F',ff=sz*3/4,staff=vm==='staff';let h='';
+  $('#tip').textContent=(staff?'오선에서 위는 핑거, 가운데는 슬랩, 아래는 베이스예요. 손(R/L)을 고른 뒤 놓고 싶은 자리를 눌러요. 한 칸에 음표 하나만 놓을 수 있어요.':TIPS[sz])+' 지금은 「'+PN[pk]+'」 1마디를 만들고 있어요.'+(pk[0]==='V'?' 기본 리듬을 불러왔어요. 한두 칸만 바꿔 보세요.':isF?' 필인은 4박(마지막 박)에 만들어요. 1~3박(흐리게 보이는 칸)은 기본 리듬이 그대로 연주돼요.':'');
+  $('#paltip').textContent=staff?'기호를 오선 위로 끌어다 놓아도 돼요. 놓는 자리의 높이에 따라 핑거·슬랩·베이스가 정해지고, 손(R/L)은 끌어 온 기호를 따라요. 음표를 누르면 지워져요.':'아이콘을 빈 칸으로 끌어다 놓아 보세요. 아이콘을 누른 뒤 칸을 눌러도 돼요. 같은 아이콘을 여러 번 쓸 수 있어요. 칸의 아이콘을 누르면 지워지고, 다른 칸으로 끌면 옮길 수 있어요.';
   document.querySelectorAll('#pt .seg-b').forEach(b=>b.classList.toggle('on',b.dataset.p===pk));
+  document.querySelectorAll('#vm .seg-b').forEach(b=>b.classList.toggle('on',b.dataset.v===vm));
+  document.querySelectorAll('#hd .seg-b').forEach(b=>b.classList.toggle('on',b.dataset.h===hand));
+  $('#hd').hidden=!staff;
+  if(staff){$('#cg').innerHTML=staffSvg();
+    document.querySelectorAll('#cg .sp').forEach(e=>{const i=+e.dataset.i,r=e.dataset.r;
+      e.onpointerdown=ev=>{if(cur[i]){startDrag(ev,cur[i],i,r)}};
+      e.onclick=()=>{if(!cur[i]){cur[i]=r+hand;beep(cur[i]);save();renderCreate()}}})}
+  else{
   h+=`<div class="cg one" style="grid-template-columns:repeat(${sz},minmax(0,1fr))">`;
   for(let k=0;k<sz;k++){
     if(isF&&k<ff){const t=pats.B[k];h+=`<div class="cc${k%gap===0?' b':''}"><div class="l">${L[k]}</div><div class="slot gh${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`}
@@ -141,43 +219,47 @@ function renderCreate(){stopPlay();const L=LB[sz],gap=sz/4,isF=pk==='F',ff=sz*3/
   $('#cg').innerHTML=h;
   document.querySelectorAll('.slot[data-i]').forEach(e=>{const i=+e.dataset.i;
     e.onpointerdown=ev=>{if(cur[i])startDrag(ev,cur[i],i)};
-    e.onclick=()=>{if(!cur[i]&&sel){cur[i]=sel;beep(sel);save();renderCreate()}}});
+    e.onclick=()=>{if(!cur[i]&&sel){cur[i]=sel;beep(sel);save();renderCreate()}}})}
   document.querySelectorAll('.tk').forEach(e=>e.classList.toggle('sel',e.dataset.t===sel));if($('#arr'))renderArr()}
-function startDrag(e,tok,from){e.preventDefault();const g=document.createElement('div');g.className='ghost';g.innerHTML=SYM(tok[0],tok[1]);document.body.appendChild(g);
-  drag={tok,from,g,x:e.clientX,y:e.clientY,moved:false};mv(e);addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up)}
+function startDrag(e,tok,from,row){e.preventDefault();const g=document.createElement('div');g.className='ghost';g.innerHTML=SYM(tok[0],tok[1]);document.body.appendChild(g);
+  drag={tok,from,row,g,x:e.clientX,y:e.clientY,moved:false};mv(e);addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up)}
 function mv(e){const d=drag;d.g.style.left=e.clientX+'px';d.g.style.top=e.clientY+'px';if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>8)d.moved=true}
 function up(e){removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);
   const d=drag;drag=null;d.g.remove();
   if(e.type==='pointercancel'){renderCreate();return}
-  if(!d.moved){if(d.from==null){sel=sel===d.tok?'':d.tok;if(sel)beep(sel)}else{cur[d.from]=sel||'';if(sel)beep(sel)}save();renderCreate();return}
-  const el=document.elementFromPoint(e.clientX,e.clientY),sl=el&&el.closest('.slot');
+  if(!d.moved){
+    if(d.from==null){sel=sel===d.tok?'':d.tok;if(sel){hand=d.tok[1];beep(sel)}}
+    else if(d.row){const i=d.from;if(cur[i][0]===d.row)cur[i]='';else{cur[i]=d.row+hand;beep(cur[i])}}
+    else{cur[d.from]=sel||'';if(sel)beep(sel)}
+    save();renderCreate();return}
+  const el=document.elementFromPoint(e.clientX,e.clientY),sl=el&&el.closest('.slot,.sp');
   if(d.from!=null)cur[d.from]='';
-  if(sl){cur[+sl.dataset.i]=d.tok;beep(d.tok)}
+  if(sl){if(sl.dataset.r){cur[+sl.dataset.i]=sl.dataset.r+d.tok[1];beep(cur[+sl.dataset.i])}else{cur[+sl.dataset.i]=d.tok;beep(d.tok)}}
   save();renderCreate()}
 async function playCreate(){
   if(timer){stopPlay();return}
   ac=ac||new AC();await ac.resume();
-  const cells=[...document.querySelectorAll('#cg .slot')],toks=barToks(pats.B,pats.V,pats.F,PK.indexOf(pk),sz),ms=60000/(+$('#bpm').value)*4/sz;let i=0;
+  const cells=[...document.querySelectorAll('#cg .slot, #cg .hl')],toks=barToks(pats,pk,sz),ms=60000/(+$('#bpm').value)*4/sz;let i=0;
   $('#pb').textContent='■ 멈추기';
-  const step=()=>{cells.forEach(c=>c.classList.remove('on'));cells[i].classList.add('on');const t=toks[i];if(t)snd(t[0]);i=(i+1)%cells.length};
+  const step=()=>{cells.forEach(c=>c.classList.remove('on'));cells[i].classList.add('on');const t=toks[i];if(t)snd(t);i=(i+1)%cells.length};
   step();timer=setInterval(step,ms)}
 async function playSong(){
   if(timer&&playing==='song'){stopPlay();playing=null;return}
   stopPlay();playing='song';ac=ac||new AC();await ac.resume();
   const my=playTok,base=+$('#bpm').value||80,steps=[];
-  arr.forEach((a,m)=>{const ms=60000/(base*SV[spd[m]])*4/sz;barToks(pats.B,pats.V,pats.F,a,sz).forEach(tk=>steps.push({m,tk,ms,v:DV[dyn[m]]}))});
+  arr.forEach((a,m)=>{const ms=60000/(base*SV[spd[m]])*4/sz;barToks(pats,PK[a],sz).forEach(tk=>steps.push({m,tk,ms,v:DV[dyn[m]]}))});
   $('#ps').textContent='■ 멈추기';let i=0,lm=-1;
   const step=()=>{if(my!==playTok)return;
     if(i>=steps.length){stopPlay();playing=null;return}
     const st=steps[i];
     if(st.m!==lm){lm=st.m;document.querySelectorAll('.mrow.on').forEach(e=>e.classList.remove('on'));const r=document.querySelector('.mrow[data-m="'+st.m+'"]');if(r)r.classList.add('on')}
-    if(st.tk)snd(st.tk[0],st.v);
+    if(st.tk)snd(st.tk,st.v);
     i++;timer=setTimeout(step,st.ms)};
   step()}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function fb(ms=8000){return window.FB?Promise.resolve(window.FB):new Promise((res,rej)=>{const t=setTimeout(()=>rej(Object.assign(new Error('load'),{code:'load'})),ms);addEventListener('fbready',()=>{clearTimeout(t);res(window.FB)},{once:true})})}
 function errMsg(e,who){const c=(e&&e.code)||'';
-  if(c==='permission-denied')return who==='t'?'권한이 없어요. 이 계정이 선생님(teachers)으로 등록되어 있는지 확인해 주세요.':'저장할 수 없어요. 우리 반이나 모둠이 닫혀 있거나 QR이 새로 바뀌었을 수 있어요. 선생님께 물어보세요.';
+  if(c==='permission-denied')return who==='t'?'권한이 없어요. 이 계정이 선생님(teachers)으로 등록되어 있는지 확인해 주세요.':'저장할 수 없어요 (permission-denied). 우리 반이나 모둠이 닫혀 있거나 QR이 새로 바뀌었을 수 있어요. 선생님께 물어보세요.';
   if(c==='auth/operation-not-allowed')return '로그인 방법이 꺼져 있어요. Firebase의 Authentication에서 익명과 Google 로그인을 켜 주세요.';
   if(c==='auth/unauthorized-domain')return '이 주소가 Firebase의 승인된 도메인에 없어요. Authentication → 설정 → 승인된 도메인에 추가해 주세요.';
   if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return '로그인 창이 닫혔어요. 다시 눌러 주세요.';
@@ -186,7 +268,7 @@ function errMsg(e,who){const c=(e&&e.code)||'';
   if(c==='exists')return '이미 있는 반이에요.';
   if(c==='submitted')return '이미 제출한 작품이에요. 고치려면 선생님께 제출을 풀어 달라고 말해요.';
   if(c==='unavailable'||c==='load'||c==='auth/network-request-failed')return '인터넷 연결을 확인하고 다시 시도해 주세요.';
-  return '문제가 생겼어요: '+(c||(e&&e.message)||'알 수 없는 오류')}
+  return '문제가 생겼어요 ('+(c||'오류')+'): '+((e&&e.message)||'알 수 없는 오류').slice(0,160)}
 
 /* ----- 학생: 반·번호로 작품 내기 ----- */
 function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-join');
@@ -199,15 +281,23 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
     const go=async submit=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60;
       if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
       if(!PK.some(k=>pats[k].some(x=>x))){m.textContent='먼저 칸에 아이콘을 넣어 리듬을 만들어 주세요.';return}
-      if(submit){const no0=PK.filter(k=>!pats[k].some(x=>x));if(no0.length){m.textContent='제출하기 전에 '+no0.map(k=>PN[k]).join(', ')+'도 만들어 주세요.';return}}
+      if(submit){const no0=['B','V1','F'].filter(k=>!pats[k].some(x=>x));if(no0.length){m.textContent='제출하기 전에 '+no0.map(k=>PN[k]).join(', ')+'도 만들어 주세요. (변형 리듬 2·3은 선택이에요.)';return}}
+      const sv=normSrc(src);if(sv===null){m.textContent='악곡 링크 주소가 올바르지 않아요. https:// 로 시작하는 주소를 적어 주세요.';return}
+      if(submit&&!note.trim()){m.textContent='제출하기 전에 바꾼 까닭(창작 의도)을 적어 주세요.';return}
       if(submit&&!ttl.trim()){m.textContent='제출하기 전에 곡 제목을 적어 주세요.';return}
       if(g){try{const F0=await fb(),gp=await F0.getGroups(j.classCode);if(gp&&gp.count&&v>gp.count){m.textContent='이 반의 모둠은 1~'+gp.count+'모둠이에요.';return}}catch(e){}}
       const who=(g?'모둠 '+v:v+'번')+', '+sz+'비트 '+bars+'마디';
       if(submit&&!confirm(who+' 작품을 제출할까요? 제출하면 고칠 수 없어요.'))return;
       lsSet(g?'cajon-gno':'cajon-no',v);$('#sb').disabled=true;$('#sd').disabled=true;m.textContent=submit?'제출하는 중…':'저장하는 중…';
-      try{const F=await fb();await F.saveCreation({type:ty,classCode:j.classCode,no:v,joinKey:j.key,beats:sz,measures:3,title:ttl.trim().slice(0,40),fill:0,cells:[...pats.B,...pats.V,...pats.F],bars,arr:arr.slice(),dyn:dyn.slice(),spd:spd.slice(),submit});
-        m.textContent=submit?'제출했어요! 선생님이 볼 수 있어요. ('+who+')':'임시 저장했어요. 아직 제출 전이에요. ('+who+', '+new Date().toLocaleTimeString('ko-KR')+')'}
-      catch(e){m.textContent=errMsg(e)}
+      let fail=false;
+      try{const F=await fb();
+        if(pendFile){m.textContent='파일 올리는 중…';
+          try{const r=await F.uploadSource(pendFile,{classCode:j.classCode});srcFile=r;lsSet('cajon-srcfile',r);pendFile=null;const sf=$('#sf');if(sf)sf.value='';const ss=$('#sfs');if(ss)ss.textContent='올린 파일: '+r.name}
+          catch(e2){console.error(e2);fail=true;m.textContent='파일을 올리지 못했어요. 악곡 링크로 대신 낼 수 있어요. ('+(e2.code||e2.message||'오류')+')'}}
+        if(!fail){m.textContent=submit?'제출하는 중…':'저장하는 중…';
+          await F.saveCreation({type:ty,classCode:j.classCode,no:v,joinKey:j.key,beats:sz,measures:5,title:ttl.trim().slice(0,40),fill:0,cells:PK.flatMap(k=>pats[k]),bars,arr:arr.slice(),dyn:dyn.slice(),spd:spd.slice(),note:note.trim().slice(0,300),ana:anaOut(),src:sv,srcFile,submit});
+          m.textContent=submit?'제출했어요! 선생님이 볼 수 있어요. ('+who+')':'임시 저장했어요. 아직 제출 전이에요. ('+who+', '+new Date().toLocaleTimeString('ko-KR')+')'}}
+      catch(e){console.error(e);m.textContent=errMsg(e)}
       const b1=$('#sb'),b2=$('#sd');if(b1)b1.disabled=false;if(b2)b2.disabled=false};
     $('#sb').onclick=()=>go(true);$('#sd').onclick=()=>go(false);
     const fg=$('#fg');if(fg)fg.onclick=async()=>{const m=$('#smsg'),v=parseInt($('#mn').value,10);
@@ -224,7 +314,7 @@ function renderSave(){const box=$('#sv');if(!box)return;const j=lsGet('cajon-joi
     $('#sf').onclick=async()=>{const m=$('#smsg'),v=parseInt($('#no').value,10),mx=g?30:60,sc=n=>n>0?n+'/5':'-';
       if(!(v>=1&&v<=mx)){m.textContent=(g?'모둠 번호를':'번호를')+' 1~'+mx+' 사이로 적어 주세요.';return}
       m.textContent='불러오는 중…';
-      try{const F=await fb();const w=await F.getMine({type:ty,classCode:j.classCode,no:v,beats:sz,measures:3});
+      try{const F=await fb();const w=await F.getMine({type:ty,classCode:j.classCode,no:v,beats:sz,measures:5});
         if(!w){m.textContent='이 번호로 저장한 '+sz+'비트 작품이 아직 없어요.';return}
         const f=w.feedback;
         if(!f){m.textContent='아직 선생님 피드백이 없어요. '+(w.submitted?'제출은 완료됐어요.':'아직 제출 전이에요.');return}
@@ -295,17 +385,33 @@ async function showGroupQR(c,d){const tv=$('#tv');
   tv.innerHTML=`<h3>${esc(c)}반 모둠별 QR</h3><p class="hint">모둠마다 QR이 달라요. 각 모둠에 하나씩 보여 주세요. 이 QR로 들어오면 그 모둠 번호로 고정돼요.</p><div class="qrgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px">`+Array.from({length:d.groupCount},(_,i)=>`<div class="card" style="text-align:center"><b>${i+1}모둠</b><div class="qrbox" id="gq${i+1}"></div></div>`).join('')+'</div>';
   tv.scrollIntoView({behavior:'smooth'});
   try{await loadQR();for(let i=1;i<=d.groupCount;i++)new QRCode($('#gq'+i),{text:base+i,width:150,height:150,correctLevel:QRCode.CorrectLevel.M})}catch(e){tv.insertAdjacentHTML('beforeend','<p>QR을 만들지 못했어요. 인터넷 연결을 확인해 주세요.</p>')}}
-const wMc=w=>[1,2,3,4].includes(w.measures)?w.measures:1;
-const isV2=w=>w.measures===3&&Array.isArray(w.arr)&&w.arr.length>=4&&w.arr.length<=16;
+const wMc=w=>[1,2,3,4,5].includes(w.measures)?w.measures:1;
+const isV2=w=>(w.measures===3||w.measures===5)&&Array.isArray(w.arr)&&w.arr.length>=4&&w.arr.length<=16;
 const c3=x=>[0,1,2].includes(x)?x:1;
-const songTxt=w=>w.arr.map((a,i)=>(i+1)+'마디 '+PN[PK[[0,1,2].includes(a)?a:0]]+' '+DYN[c3((w.dyn||[])[i])]+' '+SPD[c3((w.spd||[])[i])]);
+const pkOf=w=>w.measures===5?PK:['B','V1','F'];
+const aKey=(w,a)=>pkOf(w)[a]||'B';
+const ptOf=w=>{const o={};PK.forEach(k=>o[k]=Array(w.beats).fill(''));pkOf(w).forEach((k,q)=>o[k]=w.cells.slice(q*w.beats,(q+1)*w.beats));return o};
+const songTxt=w=>w.arr.map((a,i)=>(i+1)+'마디 '+PN[aKey(w,a)]+' '+DYN[c3((w.dyn||[])[i])]+' '+SPD[c3((w.spd||[])[i])]);
+const MTX=['','2박','3박','4박'],TPX=['','빠르다','보통','느리다'],MDX=['','밝다','어둡다'];
+const anaTxt=a=>{if(!a||typeof a!=='object')return null;const o=[];
+  if(a.mood)o.push('분위기: '+a.mood);
+  const el=[];if([2,3,4].includes(a.meter))el.push('박자 '+a.meter+'박');if([1,2,3].includes(a.tempo))el.push('빠르기 '+TPX[a.tempo]);if([1,2].includes(a.mode))el.push('조성 '+MDX[a.mode]);if(el.length)o.push(el.join(' · '));
+  const fm=(Array.isArray(a.forms)?a.forms:[]).map((f,i)=>f&&f.h===1?FORMS[i]+(f.p?'('+f.p+')':''):'').filter(Boolean);if(fm.length)o.push('형식: '+fm.join(', '));
+  (Array.isArray(a.flow)?a.flow:[]).forEach(f=>{if(f&&(f.p||f.r||f.d||f.s))o.push((f.k===1?'이완':f.k===2?'긴장':'이완·긴장')+(f.p?' ['+f.p+']':'')+' 리듬: '+(f.r||'-')+' / 셈여림: '+(f.d||'-')+' / 빠르기: '+(f.s||'-'))});
+  if(a.sum)o.push('한 문장 정리: '+a.sum);return o.length?o:null};
+const safeUrl=u=>/^https?:\/\/\S+$/i.test(String(u||''))?String(u):'';
+const anaOut=()=>({mood:ana.mood,meter:ana.meter,tempo:ana.tempo,mode:ana.mode,forms:ana.forms.map(f=>({h:f.h,p:f.p})),flow:ana.flow.map(f=>({p:f.p,k:f.k,r:f.r,d:f.d,s:f.s})),sum:ana.sum});
 const fillTxt=f=>f===2?'3, 4박 필인':f===1?'4박 필인':'필인 없음';
 function miniGrid(w){const L=LB[w.beats],gap=w.beats/4,m=wMc(w),v2=isV2(w),per=v2?w.beats:Math.min(w.beats,8),ff=w.fill===2?w.beats/2:w.fill===1?w.beats*3/4:w.beats;let h='';
-  for(let q=0;q<m;q++){if(v2)h+=`<div class="mh">${PN[PK[q]]}</div>`;else if(m>1)h+=`<div class="mh">${q+1}마디</div>`;
+  for(let q=0;q<m;q++){if(v2)h+=`<div class="mh">${PN[pkOf(w)[q]]}</div>`;else if(m>1)h+=`<div class="mh">${q+1}마디</div>`;
     for(let r=0;r<w.beats;r+=per){h+=`<div class="cg" style="grid-template-columns:repeat(${per},minmax(0,1fr))">`;
-      for(let k=r;k<r+per;k++){const i=q*w.beats+k,gh=v2&&q===2&&k<w.beats*3/4,t=TK.includes(gh?w.cells[k]:w.cells[i])?(gh?w.cells[k]:w.cells[i]):'',fi=v2?(q===2&&!gh):(w.fill>0&&q===m-1&&k>=ff);h+=`<div class="cc${k%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[k]}</div><div class="slot${gh?' gh':''}${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`}
+      for(let k=r;k<r+per;k++){const i=q*w.beats+k,gh=v2&&pkOf(w)[q]==='F'&&k<w.beats*3/4,t=TK.includes(gh?w.cells[k]:w.cells[i])?(gh?w.cells[k]:w.cells[i]):'',fi=v2?(pkOf(w)[q]==='F'&&!gh):(w.fill>0&&q===m-1&&k>=ff);h+=`<div class="cc${k%gap===0?' b':''}${fi?' fi':''}"><div class="l">${L[k]}</div><div class="slot${gh?' gh':''}${t?' f':''}">${t?SYM(t[0],t[1]):''}</div></div>`}
       h+='</div>'}}
-  if(v2)h+=`<div class="mh">곡 구성 (${w.arr.length}마디)</div><div class="arrv">`+songTxt(w).map(t=>`<span class="sc">${t}</span>`).join('')+'</div>';
+  if(v2)h+=`<div class="mh">곡 구성 (${w.arr.length}마디)</div><div class="arrv">`+songTxt(w).map(t=>`<span class="sc">${t}</span>`).join('')+'</div>'+(w.note?`<p class="cnote"><b>바꾼 까닭</b> ${esc(w.note)}</p>`:'');
+  return h}
+function srcHtml(w){let h='';const u=safeUrl(w.src);if(u)h+=`<p class="cnote"><b>악곡 링크</b> <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u.length>70?u.slice(0,70)+'…':u)}</a></p>`;
+  if(w.srcFile&&typeof w.srcFile.path==='string')h+=`<p class="cnote"><b>첨부 파일</b> ${esc(w.srcFile.name||'파일')} <button class="alt" data-sf="${esc(w.srcFile.path)}">열기</button></p>`;
+  const a=anaTxt(w.ana);if(a)h+=`<details class="fbx"><summary>곡 분석 보기</summary><div class="fbg">${a.map(x=>`<p class="cnote" style="margin:.2rem 0">${esc(x)}</p>`).join('')}</div></details>`;
   return h}
 let wf='sub';
 const SCN=[['s1','박자 이해'],['s2','창의성'],['s3','표현']];
@@ -322,11 +428,11 @@ function board(all,d){
   const gh=gn.map(i=>{const st=stOf(grp.filter(w=>w.no===i));return `<span class="bd g ${st}" aria-label="모둠 ${i} ${txt[st]}">모둠 ${i}<small>${mark[st]}${closed.includes(i)?' 닫힘':''}</small></span>`}).join('');
   return `<div class="card"><div class="ctl"><b>제출 현황 (개인)</b><span class="hint">제출 ${n-miss.length} / ${n}</span><label class="hint">반 인원 <input id="cn" type="number" min="1" max="60" value="${n}" style="width:5em"></label><button class="alt" id="cs">적용</button></div><div>${h}</div>${miss.length?`<p class="hint">아직 안 낸 번호: ${miss.join(', ')}</p>`:'<p class="hint">모두 제출했어요!</p>'}${gn.length?`<div class="ctl"><b>모둠</b></div><div>${gh}</div>`:''}<p class="hint" style="margin-bottom:0">✓ 제출 · ● 작성 중 · ○ 아직 안 냄 (4·8·16비트 중 하나라도 제출하면 ✓)</p></div>`}
 function csvOf(all,d,c){
-  const rows=[['반','구분','번호','곡 제목','박자','마디 수','필인','곡 구성(마디별)','상태','제출시각','마지막 저장','박자 이해','창의성','표현','코멘트','리듬']];
+  const rows=[['반','구분','번호','곡 제목','박자','마디 수','필인','곡 구성(마디별)','바꾼 까닭','악곡 링크','첨부 파일','곡 분석','상태','제출시각','마지막 저장','박자 이해','창의성','표현','코멘트','리듬']];
   [...all].sort((a,b)=>(a.type===b.type?0:a.type==='group'?-1:1)||a.no-b.no||a.beats-b.beats).forEach(w=>{const f=w.feedback||{};
-    rows.push([c,w.type==='group'?'모둠':'개인',w.no,w.title||'',w.beats+'비트',isV2(w)?w.arr.length:wMc(w),isV2(w)?'':fillTxt(w.fill),isV2(w)?songTxt(w).join(' / '):'',w.submitted===true?'제출':'작성 중',tmS(w.submittedAt),tmS(w.updatedAt),f.s1||'',f.s2||'',f.s3||'',f.comment||'',(isV2(w)?PK.map((k,q)=>PN[k]+': '+w.cells.slice(q*w.beats,(q+1)*w.beats).map(x=>x||'-').join(' ')).join(' | '):w.cells.map(x=>x||'-').join(' '))])});
+    rows.push([c,w.type==='group'?'모둠':'개인',w.no,w.title||'',w.beats+'비트',isV2(w)?w.arr.length:wMc(w),isV2(w)?'':fillTxt(w.fill),isV2(w)?songTxt(w).join(' / '):'',w.note||'',safeUrl(w.src),(w.srcFile&&w.srcFile.name)||'',(anaTxt(w.ana)||[]).join(' | '),w.submitted===true?'제출':'작성 중',tmS(w.submittedAt),tmS(w.updatedAt),f.s1||'',f.s2||'',f.s3||'',f.comment||'',(isV2(w)?pkOf(w).map((k,q)=>PN[k]+': '+w.cells.slice(q*w.beats,(q+1)*w.beats).map(x=>x||'-').join(' ')).join(' | '):w.cells.map(x=>x||'-').join(' '))])});
   const have=new Set(all.filter(w=>w.type==='solo').map(w=>w.no)),n=rosterN(all,d);
-  for(let i=1;i<=n;i++)if(!have.has(i))rows.push([c,'개인',i,'','','','','','안 냄','','','','','','','']);
+  for(let i=1;i<=n;i++)if(!have.has(i))rows.push([c,'개인',i,'','','','','','','','','','안 냄','','','','','','','']);
   return rows.map(r=>r.map(qv).join(',')).join('\r\n')}
 async function showWork(F,c,scroll){const tv=$('#tv');tv.innerHTML='<p class="hint">불러오는 중…</p>';
   let all;try{all=await F.listCreations(c)}catch(e){tv.innerHTML='<p>'+errMsg(e,'t')+'</p>';return}
@@ -334,13 +440,14 @@ async function showWork(F,c,scroll){const tv=$('#tv');tv.innerHTML='<p class="hi
   const d=tcache[c]||{},subN=all.filter(w=>w.submitted===true).length,list=wf==='sub'?all.filter(w=>w.submitted===true):all;
   const srt=(a,b)=>a.no-b.no||a.beats-b.beats,gs=list.filter(w=>w.type==='group').sort(srt),ss=list.filter(w=>w.type==='solo').sort(srt);
   const opts=v=>'<option value="0">-</option>'+[1,2,3,4,5].map(n=>`<option value="${n}"${+v===n?' selected':''}>${n}</option>`).join('');
-  const card=w=>{const sb=w.submitted===true,f=w.feedback||{};return `<div class="card wk" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b><span class="badge${sb?' on':''}">${sb?'제출함':'작성 중'}</span><span class="hint">${w.title?esc(w.title)+' · ':''}${w.beats}비트 ${isV2(w)?w.arr.length+'마디 곡':wMc(w)+'마디'}${w.fill?' · '+fillTxt(w.fill):''}${sb?(tmS(w.submittedAt)?' · 제출 '+tmS(w.submittedAt):''):(tmS(w.updatedAt)?' · 저장 '+tmS(w.updatedAt):'')}</span></div>${miniGrid(w)}<div class="ctl"><button data-p="1">▶ 들어보기</button>${sb?'<button class="alt" data-r="1">제출 풀기</button>':''}<button class="alt" data-x="1">삭제</button></div><details class="fbx"${w.feedback?' open':''}><summary>점수와 코멘트${w.feedback?' (입력함)':''}</summary><div class="fbg">${SCN.map(([k,nm])=>`<label>${nm} <select data-s="${k}">${opts(f[k])}</select></label>`).join('')}<label class="cm">코멘트 <textarea data-c rows="2" maxlength="300">${esc(f.comment||'')}</textarea></label><div class="ctl"><button data-fs="1">저장</button><span class="hint" data-fst></span></div></div></details></div>`};
+  const card=w=>{const sb=w.submitted===true,f=w.feedback||{};return `<div class="card wk" data-id="${esc(w.id)}"><div class="ctl"><b>${w.type==='group'?'모둠 '+esc(w.no):esc(w.no)+'번'}</b><span class="badge${sb?' on':''}">${sb?'제출함':'작성 중'}</span><span class="hint">${w.title?esc(w.title)+' · ':''}${w.beats}비트 ${isV2(w)?w.arr.length+'마디 곡':wMc(w)+'마디'}${w.fill?' · '+fillTxt(w.fill):''}${sb?(tmS(w.submittedAt)?' · 제출 '+tmS(w.submittedAt):''):(tmS(w.updatedAt)?' · 저장 '+tmS(w.updatedAt):'')}</span></div>${miniGrid(w)}${isV2(w)?srcHtml(w):''}<div class="ctl"><button data-p="1">▶ 들어보기</button>${sb?'<button class="alt" data-r="1">제출 풀기</button>':''}<button class="alt" data-x="1">삭제</button></div><details class="fbx"${w.feedback?' open':''}><summary>점수와 코멘트${w.feedback?' (입력함)':''}</summary><div class="fbg">${SCN.map(([k,nm])=>`<label>${nm} <select data-s="${k}">${opts(f[k])}</select></label>`).join('')}<label class="cm">코멘트 <textarea data-c rows="2" maxlength="300">${esc(f.comment||'')}</textarea></label><div class="ctl"><button data-fs="1">저장</button><span class="hint" data-fst></span></div></div></details></div>`};
   tv.innerHTML=`<h3>${esc(c)}반 작품</h3>`+board(all,d)+`<div class="ctl"><button class="alt" id="csv">엑셀(CSV)로 내려받기</button></div><div class="ctl"><span class="seg" role="group" aria-label="보기 방법"><button class="seg-b${wf==='sub'?' on':''}" data-f="sub">제출한 작품 (${subN})</button><button class="seg-b${wf==='all'?' on':''}" data-f="all">작성 중 포함 전체 (${all.length})</button></span></div>`+(list.length?(gs.length?`<h4 class="sec">모둠 작품 (${gs.length}개)</h4>`+gs.map(card).join(''):'')+(ss.length?`<h4 class="sec">개인 작품 (${ss.length}개)</h4>`+ss.map(card).join(''):''):`<p class="hint">${wf==='sub'?'아직 제출한 작품이 없어요.':'아직 저장된 작품이 없어요.'}</p>`);
   $('#cs').onclick=async()=>{const v=parseInt($('#cn').value,10);if(!(v>=1&&v<=60))return;try{await F.setClass(c,{studentCount:v});if(tcache[c])tcache[c].studentCount=v;showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
   $('#csv').onclick=()=>dl(c+'반_카혼작품_'+new Date().toISOString().slice(0,10)+'.csv',csvOf(all,d,c));
   tv.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{wf=b.dataset.f;showWork(F,c)});
   tv.querySelectorAll('.wk').forEach(el=>{const w=list.find(x=>x.id===el.dataset.id),nm=w.type==='group'?'모둠 '+w.no:w.no+'번';
     el.querySelector('[data-p]').onclick=()=>playCells(el,w);
+    const sfb=el.querySelector('[data-sf]');if(sfb)sfb.onclick=async()=>{sfb.disabled=true;try{const F2=await fb();const u=await F2.sourceUrl(sfb.dataset.sf);window.open(u,'_blank','noopener')}catch(e){alert('파일을 열지 못했어요: '+(e.code||e.message))}sfb.disabled=false};
     const r=el.querySelector('[data-r]');if(r)r.onclick=async()=>{if(!confirm(nm+' 제출을 풀까요? 학생이 다시 고칠 수 있게 돼요.'))return;try{await F.reopen(w.id);showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
     el.querySelector('[data-x]').onclick=async()=>{if(!confirm(nm+' 작품을 삭제할까요?'))return;try{await F.deleteCreation(w.id);showWork(F,c)}catch(e){alert(errMsg(e,'t'))}};
     el.querySelector('[data-fs]').onclick=async()=>{const st=el.querySelector('[data-fst]'),v={comment:el.querySelector('[data-c]').value.trim().slice(0,300)};
@@ -353,13 +460,13 @@ async function playCells(card,w){
   if(same)return;
   ac=ac||new AC();await ac.resume();card.classList.add('playing');
   const els=[...card.querySelectorAll('.slot')],cells=w.cells,beats=w.beats,steps=[];
-  if(isV2(w)){w.arr.forEach((a,m)=>{const q=[0,1,2].includes(a)?a:0,ms=60000/(80*SV[c3((w.spd||[])[m])])*4/beats,v=DV[c3((w.dyn||[])[m])];
-    const tk=barToks(cells.slice(0,beats),cells.slice(beats,2*beats),cells.slice(2*beats,3*beats),q,beats);for(let k=0;k<beats;k++)steps.push({i:(q===2&&k<beats*3/4)?k:q*beats+k,tk:tk[k],ms,v})})}
+  if(isV2(w)){const pt=ptOf(w),ks=pkOf(w);w.arr.forEach((a,m)=>{const key=aKey(w,a),q=ks.indexOf(key),ms=60000/(80*SV[c3((w.spd||[])[m])])*4/beats,v=DV[c3((w.dyn||[])[m])];
+    const tk=barToks(pt,key,beats);for(let k=0;k<beats;k++)steps.push({i:(key==='F'&&k<beats*3/4)?k:q*beats+k,tk:tk[k],ms,v})})}
   else{const ms=60000/80*4/beats;for(let i=0;i<els.length;i++)steps.push({i,tk:cells[i],ms,v:1})}
   const my=playTok;let n=0;
   const step=()=>{if(my!==playTok)return;els.forEach(c=>c.classList.remove('on'));
     if(n>=steps.length){stopPlay();card.classList.remove('playing');return}
-    const st=steps[n];els[st.i].classList.add('on');const t=st.tk;if(TK.includes(t))snd(t[0],st.v);n++;timer=setTimeout(step,st.ms)};
+    const st=steps[n];els[st.i].classList.add('on');const t=st.tk;if(TK.includes(t))snd(t,st.v);n++;timer=setTimeout(step,st.ms)};
   step()}
 
 /* ----- 비평 ----- */
@@ -421,7 +528,7 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1029-d</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1031-a</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};

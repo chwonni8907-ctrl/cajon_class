@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // 악곡 파일 첨부: sources/반코드/학생uid/파일이름
+    match /sources/{classCode}/{uid}/{file} {
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 20 * 1024 * 1024
+        && (request.resource.contentType.matches('audio/.*')
+          || request.resource.contentType.matches('image/.*')
+          || request.resource.contentType == 'application/pdf');
+      allow read: if request.auth != null
+        && (request.auth.uid == uid
+          || firestore.exists(/databases/(default)/documents/teachers/$(request.auth.uid)));
+      allow update, delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

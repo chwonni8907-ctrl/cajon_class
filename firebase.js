@@ -63,8 +63,10 @@ window.FB = {
   // ----- 학생: 작품 저장 -----
   // 개인(solo): 같은 기기·반·번호·박자는 한 문서를 덮어써요.
   // 모둠(group): 같은 반·모둠 번호·박자는 한 문서를 모둠 친구들이 함께 덮어써요.
-  async saveCreation({ type, classCode, no, joinKey, beats, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, submit }) {
-    const extra = arr ? { bars, arr, dyn, spd } : {};
+  async saveCreation({ type, classCode, no, joinKey, beats, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, note = "", ana, src = "", srcFile, submit }) {
+    const extra = arr ? { bars, arr, dyn, spd, note, src } : {};
+    if (arr && ana) extra.ana = ana;
+    if (arr && srcFile && srcFile.path) extra.srcFile = { name: String(srcFile.name || "").slice(0, 100), path: String(srcFile.path).slice(0, 200) };
     const u = await ensureSignedIn();
     const id = idOf(u.uid, { type, classCode, no, beats, measures });
     const ref = doc(db, "creations", id);
@@ -83,6 +85,21 @@ window.FB = {
         createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...sub
       });
     }
+  },
+
+  // ----- 악곡 파일 첨부 (Firebase Storage) -----
+  async uploadSource(file, { classCode }) {
+    const { getStorage, ref: sRef, uploadBytes } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js");
+    const storage = getStorage(app);
+    const u = await ensureSignedIn();
+    const safe = String(file.name || "file").replace(/[^A-Za-z0-9._-]/g, "_").slice(-60) || "file";
+    const path = `sources/${classCode}/${u.uid}/${Date.now()}_${safe}`;
+    await uploadBytes(sRef(storage, path), file, { contentType: file.type || "application/octet-stream" });
+    return { name: String(file.name || safe).slice(0, 100), path };
+  },
+  async sourceUrl(path) {
+    const { getStorage, ref: sRef, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js");
+    return getDownloadURL(sRef(getStorage(app), path));
   },
 
   // ----- 비평 -----
