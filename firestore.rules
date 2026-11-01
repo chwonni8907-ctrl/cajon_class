@@ -49,9 +49,10 @@ service cloud.firestore {
           && d.spd is list && d.spd.size() == d.bars && d.spd.hasOnly([0, 1, 2])))
         && (d.get('measures', 1) in [3, 5] || !d.keys().hasAny(['bars', 'arr', 'dyn', 'spd', 'ana', 'src', 'srcFile']))
         && (!('ana' in d) || (d.ana is map
-          && d.ana.keys().hasOnly(['mood', 'meter', 'tempo', 'mode', 'forms', 'flow', 'sum'])
+          && d.ana.keys().hasOnly(['mood', 'meter', 'mx', 'tempo', 'mode', 'forms', 'flow', 'sum'])
           && d.ana.get('mood', '') is string && d.ana.get('mood', '').size() <= 60
-          && d.ana.get('meter', 0) in [0, 2, 3, 4]
+          && d.ana.get('meter', 0) in [0, 2, 3, 4, 5, 6]
+          && d.ana.get('mx', '') is string && d.ana.get('mx', '').size() <= 20
           && d.ana.get('tempo', 0) in [0, 1, 2, 3]
           && d.ana.get('mode', 0) in [0, 1, 2]
           && d.ana.get('forms', []) is list && d.ana.get('forms', []).size() <= 6

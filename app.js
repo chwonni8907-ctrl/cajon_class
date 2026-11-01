@@ -111,10 +111,10 @@ let note='',pats={B:[],V1:[],V2:[],V3:[],F:[]},pk='B',bars=8,arr=[],dyn=[],spd=[
 /* ----- 1단계: 곡 분석 상태 ----- */
 const FORMS=['intro','verse','pre-chorus','chorus','bridge','outro'];
 const s0=(x,n)=>String(x==null?'':x).slice(0,n);
-const anaNew=()=>({mood:'',meter:0,tempo:0,mode:0,forms:FORMS.map(()=>({h:0,p:''})),flow:[0,1,2].map(()=>({p:'',k:0,r:'',d:'',s:''})),sum:''});
+const anaNew=()=>({mood:'',meter:0,mx:'',tempo:0,mode:0,forms:FORMS.map(()=>({h:0,p:''})),flow:[0,1,2].map(()=>({p:'',k:0,r:'',d:'',s:''})),sum:''});
 let ana=anaNew(),src='',srcFile=null,pendFile=null;
 function loadAna(){const v=lsGet('cajon-ana');ana=anaNew();
-  if(v&&typeof v==='object'){ana.mood=s0(v.mood,60);ana.meter=[2,3,4].includes(v.meter)?v.meter:0;ana.tempo=[1,2,3].includes(v.tempo)?v.tempo:0;ana.mode=[1,2].includes(v.mode)?v.mode:0;ana.sum=s0(v.sum,200);
+  if(v&&typeof v==='object'){ana.mood=s0(v.mood,60);ana.meter=[2,3,4,5,6].includes(v.meter)?v.meter:0;ana.mx=s0(v.mx,20);ana.tempo=[1,2,3].includes(v.tempo)?v.tempo:0;ana.mode=[1,2].includes(v.mode)?v.mode:0;ana.sum=s0(v.sum,200);
     FORMS.forEach((_,i)=>{const f=v.forms&&v.forms[i];if(f)ana.forms[i]={h:[1,2].includes(f.h)?f.h:0,p:s0(f.p,60)}});
     [0,1,2].forEach(i=>{const f=v.flow&&v.flow[i];if(f)ana.flow[i]={p:s0(f.p,60),k:[1,2].includes(f.k)?f.k:0,r:s0(f.r,100),d:s0(f.d,100),s:s0(f.s,100)}})}
   src=s0(lsGet('cajon-src'),300);const sf=lsGet('cajon-srcfile');srcFile=sf&&typeof sf.name==='string'&&typeof sf.path==='string'?{name:s0(sf.name,100),path:s0(sf.path,200)}:null}
@@ -125,17 +125,17 @@ function anaHtml(){
   return `<div class="card ttl"><label>곡 제목 <input id="ct" type="text" maxlength="40" placeholder="곡 제목을 적어요" autocomplete="off"></label>
 <label class="ci" style="margin-top:10px">악곡 링크 (유튜브나 음원 사이트 주소) <input id="sl" type="url" maxlength="300" placeholder="https://" autocomplete="off" inputmode="url"></label>
 <div class="ci" style="margin-top:10px"><span>악곡 파일 첨부 <small class="hint">음원, 악보 사진, PDF · 20MB까지</small></span><input id="sf" type="file" accept="audio/*,image/*,application/pdf"><p class="hint" id="sfs" style="margin:.2rem 0 0"></p></div></div>
-<div class="card"><label class="ci">곡의 분위기 (예: 신나는, 차분한, 웅장한) <input id="am" type="text" maxlength="60" autocomplete="off"></label>
-<p class="hint" style="margin:10px 0 4px">음악을 들으며 알맞은 것을 골라요. 다시 누르면 선택이 풀려요.</p>
-<div class="arow"><b>박자</b>${seg('meter',[[2,'2박'],[3,'3박'],[4,'4박']],'박자')}</div>
+<div class="card"><label class="ci">곡의 분위기 (예시: 신나는, 차분한, 웅장한) <input id="am" type="text" maxlength="60" autocomplete="off"></label>
+<h4 class="sec" style="margin:14px 0 4px">곡 흐름에 따른 음악 요소 분석하기</h4><p class="hint" style="margin:0 0 4px">음악을 들으며 알맞은 것을 골라요. 다시 누르면 선택이 풀려요.</p>
+<div class="arow"><b>박자</b>${seg('meter',[[2,'2박'],[3,'3박'],[4,'4박'],[6,'6박'],[5,'기타']],'박자')}<input type="text" id="amx" maxlength="20" placeholder="기타 박자 (예: 5박)" aria-label="기타 박자 입력" autocomplete="off" style="max-width:9rem"></div>
 <div class="arow"><b>빠르기</b>${seg('tempo',[[1,'빠르다'],[2,'보통'],[3,'느리다']],'빠르기')}</div>
-<div class="arow"><b>조성</b>${seg('mode',[[1,'밝다'],[2,'어둡다']],'조성')}</div></div>
-<h4 class="sec">곡의 흐름에 따른 형식</h4><p class="hint" style="margin-top:0">이 곡에 있는 부분을 골라 어디에 있는지 적어요. (예: 0:00~0:20)</p>
-<div class="card">${FORMS.map((n,i)=>`<div class="frow"><b>${n}</b><select data-fh="${i}" aria-label="${n} 있음 없음"><option value="0">-</option><option value="1">있다</option><option value="2">없다</option></select><input type="text" data-fp="${i}" maxlength="60" placeholder="위치" aria-label="${n} 위치" autocomplete="off"></div>`).join('')}</div>
-<h4 class="sec">이완과 긴장 찾기</h4><p class="hint" style="margin-top:0">이완은 편안하고 느슨한 부분, 긴장은 고조되고 팽팽한 부분이에요. 그 부분에서 리듬, 셈여림, 빠르기가 어떻게 달라지는지 써요.</p>
-<div class="card">${[0,1,2].map(i=>`<div class="flrow"><div class="flh"><b>${i+1}</b><input type="text" data-fl="${i}" data-k="p" maxlength="60" placeholder="부분 (형식 이름이나 위치)" aria-label="${i+1}번 부분" autocomplete="off"><select data-fk="${i}" aria-label="${i+1}번 이완 긴장"><option value="0">-</option><option value="1">이완</option><option value="2">긴장</option></select></div><input type="text" data-fl="${i}" data-k="r" maxlength="100" placeholder="리듬의 변화" aria-label="${i+1}번 리듬의 변화" autocomplete="off"><input type="text" data-fl="${i}" data-k="d" maxlength="100" placeholder="셈여림의 변화" aria-label="${i+1}번 셈여림의 변화" autocomplete="off"><input type="text" data-fl="${i}" data-k="s" maxlength="100" placeholder="빠르기의 변화" aria-label="${i+1}번 빠르기의 변화" autocomplete="off"></div>`).join('')}</div>
-<div class="card"><label class="ci">이 곡의 흐름을 한 문장으로 정리해요 <textarea id="asum" rows="2" maxlength="200" placeholder="예: 이 곡은 verse에서 느슨하게 시작해 chorus에서 팽팽해진다."></textarea></label></div>`}
-function createHtml(){return `<h3>1단계 · 곡 분석하기</h3><p class="hint" style="margin-top:0">리듬을 만들기 전에 곡을 먼저 들어요. 곡의 제목과 분위기, 형식, 이완과 긴장을 살펴 곡의 흐름을 파악해요.</p>${anaHtml()}
+<div class="arow"><b>조성</b>${seg('mode',[[1,'밝은(장조)'],[2,'어두운(단조)']],'조성')}</div></div>
+<h4 class="sec">곡 흐름에 따른 형식 분석하기</h4><p class="hint" style="margin-top:0">곡에 그 형식이 있으면 Y, 없으면 N을 골라요. 가사에는 그 부분의 가사를 적어요.</p>
+<div class="card">${FORMS.map((n,i)=>`<div class="frow"><b>${n}</b><select data-fh="${i}" aria-label="${n} 유무 Y N"><option value="0">-</option><option value="1">Y</option><option value="2">N</option></select><input type="text" data-fp="${i}" maxlength="60" placeholder="가사" aria-label="${n} 가사" autocomplete="off"></div>`).join('')}</div>
+<h4 class="sec">이완과 긴장이 어디인지 찾아보기</h4><p class="hint" style="margin-top:0">이완(편안하고 느슨한 부분)과 긴장(고조되고 팽팽한 부분)이 어디인지 찾아 표에 써 봐요. 그 부분에서 리듬, 셈여림, 빠르기가 어떻게 변하는지 분석해 봐요.</p>
+<div class="card">${[0,1,2].map(i=>`<div class="flrow"><div class="flh"><b>${i+1}</b><input type="text" data-fl="${i}" data-k="p" maxlength="60" placeholder="부분 (형식, 위치)" aria-label="${i+1}번 부분" autocomplete="off"><select data-fk="${i}" aria-label="${i+1}번 이완 긴장"><option value="0">-</option><option value="1">이완</option><option value="2">긴장</option></select></div><input type="text" data-fl="${i}" data-k="r" maxlength="100" placeholder="리듬의 변화" aria-label="${i+1}번 리듬의 변화" autocomplete="off"><input type="text" data-fl="${i}" data-k="d" maxlength="100" placeholder="셈여림의 변화" aria-label="${i+1}번 셈여림의 변화" autocomplete="off"><input type="text" data-fl="${i}" data-k="s" maxlength="100" placeholder="빠르기의 변화" aria-label="${i+1}번 빠르기의 변화" autocomplete="off"></div>`).join('')}</div>
+`}
+function createHtml(){return `<h3>1단계 · [카혼 연주-창작 계획서]</h3><p class="hint" style="margin-top:0">리듬을 만들기 전에 곡을 먼저 들어요. 악곡의 음악 요소와 특징의 변화를 분석해 곡의 흐름을 파악해요.</p><h4 class="sec" style="margin-top:0">선택한 곡 개요</h4>${anaHtml()}
 <h3>2단계 · 리듬 창작하기</h3><p class="hint" style="margin-top:0">곡의 흐름에 어울리는 리듬을 1마디씩 만들어요. <b>기본 리듬</b>은 곡의 바탕, <b>변형 리듬</b>은 기본 리듬을 한두 칸 바꾼 것(세 개까지), <b>필인</b>은 4박에서 흐름을 바꾸거나 마무리하는 리듬이에요.</p><div class="cbar"><select id="sz" aria-label="비트 고르기"><option value="4">4비트</option><option value="8">8비트</option><option value="16">16비트</option></select><span class="seg" id="vm" role="group" aria-label="리듬을 놓는 방법" style="grid-column:span 2"><button type="button" class="seg-b" data-v="grid">칸에 놓기</button><button type="button" class="seg-b" data-v="staff">오선에 놓기</button></span></div><div class="ptabs"><span class="seg" id="pt" role="group" aria-label="만들 리듬 고르기">${PK.map(k=>`<button type="button" class="seg-b" data-p="${k}">${TAB[k]}</button>`).join('')}</span></div><p id="tip"></p><div class="card"><div class="ctl hand" id="hd" hidden><b>손</b><span class="seg" role="group" aria-label="손 고르기"><button type="button" class="seg-b" data-h="R">오른손 R</button><button type="button" class="seg-b" data-h="L">왼손 L</button></span></div><div id="cg"></div><div class="ctl"><button id="pb">▶ 이 리듬 들어보기</button><button class="alt" id="clr">이 리듬 지우기</button></div></div><h3>기호 고르기</h3><div class="card"><div id="pal" class="pal"></div><p class="hint" style="margin-bottom:0" id="paltip"></p></div><div class="card"><label class="ci">바꾼 까닭 (창작 의도) <textarea id="cn" rows="4" maxlength="300" placeholder="예: 변형 리듬 1은 3박의 슬랩을 베이스로 바꿔서 더 묵직하게 만들었어요. 필인은 곡이 끝나는 느낌이 나도록 4박을 빠르게 채웠어요."></textarea></label><p class="hint" style="margin-bottom:0">기본 리듬에서 무엇을 어떻게 바꿨는지, 왜 그렇게 했는지 한 줄로 써요. ~를 ~로 바꾸어 ~한 느낌을 냈다. (300자까지)</p></div>
 <h3>3단계 · 곡 구성하기</h3><div class="card"><div class="ctl"><label>곡의 마디 수 <select id="nb" aria-label="곡의 마디 수">${Array.from({length:13},(_,i)=>`<option value="${i+4}">${i+4}마디</option>`).join('')}</select></label></div><p class="hint">마디마다 어떤 리듬을 칠지, 얼마나 세게(셈여림), 얼마나 빠르게(빠르기) 칠지 골라요. 처음에는 8마디를 권해요.</p><div id="arr"></div><div class="ctl"><button id="ps">▶ 곡 전체 들어보기</button><label>기본 빠르기 <input id="bpm" type="range" min="50" max="140" value="80"></label></div></div><h3>작품 저장과 제출</h3><div class="card" id="sv"></div>`}
 const ckey=()=>'cajon-v3-'+sz;
@@ -148,11 +148,12 @@ function fitArr(a,d,p){arr=[];dyn=[];spd=[];for(let i=0;i<bars;i++){arr.push([0,
 function saveArr(){lsSet('cajon-v3-arr',{bars,arr,dyn,spd})}
 function beep(t){ac=ac||new AC();ac.resume();snd(t)}
 function initAna(){loadAna();
-  $('#sl').value=src;$('#am').value=ana.mood;$('#asum').value=ana.sum;
+  $('#sl').value=src;$('#am').value=ana.mood;
   const paint=()=>document.querySelectorAll('[data-sg]').forEach(b=>b.classList.toggle('on',ana[b.dataset.sg]===+b.dataset.v));paint();
   document.querySelectorAll('[data-sg]').forEach(b=>b.onclick=()=>{const k=b.dataset.sg,v=+b.dataset.v;ana[k]=ana[k]===v?0:v;saveAna();paint()});
   $('#am').oninput=e=>{ana.mood=s0(e.target.value,60);saveAna()};
-  $('#asum').oninput=e=>{ana.sum=s0(e.target.value,200);saveAna()};
+  $('#amx').value=ana.mx;$('#amx').oninput=e=>{ana.mx=s0(e.target.value,20);if(ana.mx&&ana.meter!==5){ana.meter=5;paint()}saveAna()};
+  
   document.querySelectorAll('[data-fh]').forEach(e=>{e.value=ana.forms[+e.dataset.fh].h;e.onchange=()=>{ana.forms[+e.dataset.fh].h=+e.value;saveAna()}});
   document.querySelectorAll('[data-fp]').forEach(e=>{e.value=ana.forms[+e.dataset.fp].p;e.oninput=()=>{ana.forms[+e.dataset.fp].p=s0(e.value,60);saveAna()}});
   document.querySelectorAll('[data-fk]').forEach(e=>{e.value=ana.flow[+e.dataset.fk].k;e.onchange=()=>{ana.flow[+e.dataset.fk].k=+e.value;saveAna()}});
@@ -392,15 +393,15 @@ const pkOf=w=>w.measures===5?PK:['B','V1','F'];
 const aKey=(w,a)=>pkOf(w)[a]||'B';
 const ptOf=w=>{const o={};PK.forEach(k=>o[k]=Array(w.beats).fill(''));pkOf(w).forEach((k,q)=>o[k]=w.cells.slice(q*w.beats,(q+1)*w.beats));return o};
 const songTxt=w=>w.arr.map((a,i)=>(i+1)+'마디 '+PN[aKey(w,a)]+' '+DYN[c3((w.dyn||[])[i])]+' '+SPD[c3((w.spd||[])[i])]);
-const MTX=['','2박','3박','4박'],TPX=['','빠르다','보통','느리다'],MDX=['','밝다','어둡다'];
+const MTX=['','2박','3박','4박'],TPX=['','빠르다','보통','느리다'],MDX=['','밝은(장조)','어두운(단조)'];
 const anaTxt=a=>{if(!a||typeof a!=='object')return null;const o=[];
   if(a.mood)o.push('분위기: '+a.mood);
-  const el=[];if([2,3,4].includes(a.meter))el.push('박자 '+a.meter+'박');if([1,2,3].includes(a.tempo))el.push('빠르기 '+TPX[a.tempo]);if([1,2].includes(a.mode))el.push('조성 '+MDX[a.mode]);if(el.length)o.push(el.join(' · '));
+  const el=[];if([2,3,4,6].includes(a.meter))el.push('박자 '+a.meter+'박');else if(a.meter===5)el.push('박자 '+(a.mx||'기타'));if([1,2,3].includes(a.tempo))el.push('빠르기 '+TPX[a.tempo]);if([1,2].includes(a.mode))el.push('조성 '+MDX[a.mode]);if(el.length)o.push(el.join(' · '));
   const fm=(Array.isArray(a.forms)?a.forms:[]).map((f,i)=>f&&f.h===1?FORMS[i]+(f.p?'('+f.p+')':''):'').filter(Boolean);if(fm.length)o.push('형식: '+fm.join(', '));
   (Array.isArray(a.flow)?a.flow:[]).forEach(f=>{if(f&&(f.p||f.r||f.d||f.s))o.push((f.k===1?'이완':f.k===2?'긴장':'이완·긴장')+(f.p?' ['+f.p+']':'')+' 리듬: '+(f.r||'-')+' / 셈여림: '+(f.d||'-')+' / 빠르기: '+(f.s||'-'))});
   if(a.sum)o.push('한 문장 정리: '+a.sum);return o.length?o:null};
 const safeUrl=u=>/^https?:\/\/\S+$/i.test(String(u||''))?String(u):'';
-const anaOut=()=>({mood:ana.mood,meter:ana.meter,tempo:ana.tempo,mode:ana.mode,forms:ana.forms.map(f=>({h:f.h,p:f.p})),flow:ana.flow.map(f=>({p:f.p,k:f.k,r:f.r,d:f.d,s:f.s})),sum:ana.sum});
+const anaOut=()=>({mood:ana.mood,meter:ana.meter,mx:ana.meter===5?ana.mx:'',tempo:ana.tempo,mode:ana.mode,forms:ana.forms.map(f=>({h:f.h,p:f.p})),flow:ana.flow.map(f=>({p:f.p,k:f.k,r:f.r,d:f.d,s:f.s})),sum:ana.sum});
 const fillTxt=f=>f===2?'3, 4박 필인':f===1?'4박 필인':'필인 없음';
 function miniGrid(w){const L=LB[w.beats],gap=w.beats/4,m=wMc(w),v2=isV2(w),per=v2?w.beats:Math.min(w.beats,8),ff=w.fill===2?w.beats/2:w.fill===1?w.beats*3/4:w.beats;let h='';
   for(let q=0;q<m;q++){if(v2)h+=`<div class="mh">${PN[pkOf(w)[q]]}</div>`;else if(m>1)h+=`<div class="mh">${q+1}마디</div>`;
@@ -528,7 +529,7 @@ function route(){
     h+=n.c?`<h2>${n.t}</h2><div class="btns">${n.c.map(c=>`<a class="big" href="#/${c.id}" style="text-decoration:none">${c.t}${c.d?`<small>${c.d}</small>`:''}</a>`).join('')}</div>`:body(n);
     h+='</main>';
   }
-  $('#app').innerHTML=h+'<p class="ver">버전 1101-a</p>';
+  $('#app').innerHTML=h+'<p class="ver">버전 1101-b</p>';
   $('#panel').innerHTML='<h4>메뉴</h4>'+`<ul><li><a href="#/">처음으로</a></li></ul>`+menuHtml(TREE,n.id)+'<ul><li><a href="#/teacher">선생님 전용</a></li></ul>';
   const go=$('#go');if(go)go.onclick=()=>$('#menu').classList.add('open');
   const showMenu=()=>{menuShown=true;try{sessionStorage.setItem('cajon-menu','1')}catch(e){}const hb=$('#hb'),hn=$('#hint');if(hb)hb.style.display='grid';if(hn)hn.style.display='none'};
