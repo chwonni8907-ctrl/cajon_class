@@ -40,8 +40,9 @@ async function ensureSignedIn() {
 }
 
 // 문서 이름: 1마디는 예전 방식 그대로, 2·4마디는 뒤에 _m2, _m4 를 붙여요.
-const idOf = (uid, { type, classCode, no, beats, measures }) => {
-  const tail = measures > 1 ? `_${beats}_m${measures}` : `_${beats}`;
+const idOf = (uid, { type, classCode, no, beats, measures, mt }) => {
+  const tm = mt && mt !== 4 ? `_t${mt}` : "";
+  const tail = measures > 1 ? `_${beats}${tm}_m${measures}` : `_${beats}`;
   return type === "group" ? `${classCode}_g${no}${tail}` : `${uid}_${classCode}_s${no}${tail}`;
 };
 
@@ -63,12 +64,13 @@ window.FB = {
   // ----- 학생: 작품 저장 -----
   // 개인(solo): 같은 기기·반·번호·박자는 한 문서를 덮어써요.
   // 모둠(group): 같은 반·모둠 번호·박자는 한 문서를 모둠 친구들이 함께 덮어써요.
-  async saveCreation({ type, classCode, no, joinKey, beats, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, note = "", ana, src = "", srcFile, submit }) {
+  async saveCreation({ type, classCode, no, joinKey, beats, mt, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, note = "", ana, src = "", srcFile, submit }) {
     const extra = arr ? { bars, arr, dyn, spd, note, src } : {};
+    if (arr && mt) extra.mt = mt;
     if (arr && ana) extra.ana = ana;
     if (arr && srcFile && srcFile.path) extra.srcFile = { name: String(srcFile.name || "").slice(0, 100), path: String(srcFile.path).slice(0, 200) };
     const u = await ensureSignedIn();
-    const id = idOf(u.uid, { type, classCode, no, beats, measures });
+    const id = idOf(u.uid, { type, classCode, no, beats, measures, mt });
     const ref = doc(db, "creations", id);
     const snap = await getDoc(ref);
     const sub = submit
@@ -144,9 +146,9 @@ window.FB = {
   },
   deleteCreation(id) { return deleteDoc(doc(db, "creations", id)); },
   setFeedback(id, feedback) { return updateDoc(doc(db, "creations", id), { feedback }); },
-  async getMine({ type, classCode, no, beats, measures = 1 }) {
+  async getMine({ type, classCode, no, beats, mt, measures = 1 }) {
     const u = await ensureSignedIn();
-    const id = idOf(u.uid, { type, classCode, no, beats, measures });
+    const id = idOf(u.uid, { type, classCode, no, beats, measures, mt });
     const snap = await getDoc(doc(db, "creations", id));
     return snap.exists() ? snap.data() : null;
   },
