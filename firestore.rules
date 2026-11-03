@@ -14,13 +14,18 @@ service cloud.firestore {
       return signedIn() && data.uid == request.auth.uid;
     }
 
+    // 내가 만든 반의 작품·비평인지 (선생님 전용)
+    function ownsDoc(data) {
+      return isTeacher() && data.owner == request.auth.uid;
+    }
+
     function classDoc(code) {
       return get(/databases/$(database)/documents/classes/$(code)).data;
     }
 
     function validCreation(d) {
-      return d.keys().hasOnly(['uid', 'type', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'submitted', 'submittedAt', 'feedback', 'measures', 'title', 'createdAt', 'updatedAt', 'bars', 'arr', 'dyn', 'spd', 'note', 'ana', 'src', 'srcFile', 'mt'])
-        && d.keys().hasAll(['uid', 'type', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'submitted', 'submittedAt', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['uid', 'type', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'submitted', 'submittedAt', 'feedback', 'measures', 'title', 'createdAt', 'updatedAt', 'bars', 'arr', 'dyn', 'spd', 'note', 'ana', 'src', 'srcFile', 'mt', 'owner'])
+        && d.keys().hasAll(['uid', 'owner', 'type', 'classCode', 'no', 'joinKey', 'beats', 'fill', 'cells', 'submitted', 'submittedAt', 'createdAt', 'updatedAt'])
         && d.uid == request.auth.uid
         && d.classCode is string
         && d.classCode.size() >= 1
@@ -31,6 +36,8 @@ service cloud.firestore {
         && d.no >= 1
         && ((d.type == 'solo' && d.no <= 60) || (d.type == 'group' && d.no <= classDoc(d.classCode).get('groupCount', 30)))
         && d.joinKey is string
+        && d.owner is string
+        && classDoc(d.classCode).owner == d.owner
         && classDoc(d.classCode).open == true
         && classDoc(d.classCode).joinKey == d.joinKey
         && !(d.type == 'group' && d.no in classDoc(d.classCode).get('closedGroups', []))
@@ -81,8 +88,8 @@ service cloud.firestore {
     }
 
     function validCritique(d) {
-      return d.keys().hasOnly(['uid', 'type', 'classCode', 'no', 'joinKey', 'group', 'targetType', 'work', 'target', 'text', 'createdAt'])
-        && d.keys().hasAll(['uid', 'type', 'classCode', 'no', 'joinKey', 'work', 'target', 'text', 'createdAt'])
+      return d.keys().hasOnly(['uid', 'owner', 'type', 'classCode', 'no', 'joinKey', 'group', 'targetType', 'work', 'target', 'text', 'createdAt'])
+        && d.keys().hasAll(['uid', 'owner', 'type', 'classCode', 'no', 'joinKey', 'work', 'target', 'text', 'createdAt'])
         && d.uid == request.auth.uid
         && d.classCode is string
         && d.classCode.size() >= 1
@@ -95,6 +102,8 @@ service cloud.firestore {
         && d.get('targetType', 'group') in ['solo', 'group']
         && (!('group' in d) || (d.group is int && d.group >= 1 && d.group <= 30 && !(d.group in classDoc(d.classCode).get('closedGroups', []))))
         && d.joinKey is string
+        && d.owner is string
+        && classDoc(d.classCode).owner == d.owner
         && classDoc(d.classCode).open == true
         && classDoc(d.classCode).joinKey == d.joinKey
         && d.work is string && d.work.size() >= 1 && d.work.size() <= 60
@@ -105,14 +114,14 @@ service cloud.firestore {
 
     match /critiques/{critiqueId} {
       allow create: if signedIn() && validCritique(request.resource.data);
-      allow get, list: if isOwner(resource.data) || isTeacher();
+      allow get, list: if isOwner(resource.data) || ownsDoc(resource.data);
       allow update: if false;
-      allow delete: if isTeacher();
+      allow delete: if ownsDoc(resource.data);
     }
 
     match /creations/{creationId} {
-      allow get: if signedIn() && (resource == null || resource.data.uid == request.auth.uid || resource.data.type == 'group' || isTeacher());
-      allow list: if isOwner(resource.data) || isTeacher();
+      allow get: if signedIn() && (resource == null || resource.data.uid == request.auth.uid || resource.data.type == 'group' || ownsDoc(resource.data));
+      allow list: if isOwner(resource.data) || ownsDoc(resource.data);
 
       allow create: if signedIn()
         && validCreation(request.resource.data)
@@ -127,16 +136,17 @@ service cloud.firestore {
           && request.resource.data.type == resource.data.type
           && request.resource.data.classCode == resource.data.classCode
           && request.resource.data.no == resource.data.no
+          && request.resource.data.owner == resource.data.owner
           && request.resource.data.createdAt == resource.data.createdAt
           && request.resource.data.updatedAt == request.time
           && request.resource.data.get('feedback', null) == resource.data.get('feedback', null)
         ) || (
-          isTeacher()
+          ownsDoc(resource.data)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['submitted', 'submittedAt'])
           && request.resource.data.submitted == false
           && request.resource.data.submittedAt == null
         ) || (
-          isTeacher()
+          ownsDoc(resource.data)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback'])
           && request.resource.data.feedback is map
           && request.resource.data.feedback.keys().hasOnly(['s1', 's2', 's3', 'comment'])
@@ -144,21 +154,37 @@ service cloud.firestore {
           && request.resource.data.feedback.comment.size() <= 300
         );
 
-      allow delete: if isOwner(resource.data) || isTeacher();
+      allow delete: if isOwner(resource.data) || ownsDoc(resource.data);
     }
 
+    // 반: 만든 선생님만 보고 바꿀 수 있어요. (학생은 작품·비평 규칙이 반 정보를 확인해요)
     match /classes/{classCode} {
-      allow read, write: if isTeacher();
+      allow get, list, delete: if isTeacher() && resource.data.owner == request.auth.uid;
+      allow create: if isTeacher() && request.resource.data.owner == request.auth.uid;
+      allow update: if isTeacher() && resource.data.owner == request.auth.uid
+        && request.resource.data.owner == resource.data.owner;
     }
 
     match /groups/{code} {
       allow read: if signedIn();
-      allow write: if isTeacher();
+      allow write: if isTeacher() && classDoc(code).owner == request.auth.uid;
     }
 
     match /teachers/{uid} {
       allow get: if signedIn() && request.auth.uid == uid;
-      allow write: if false;
+      // 가입: Google 로그인한 사람이 가입 코드(config/signup 문서의 code)를 맞게 적으면 스스로 등록돼요.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && request.resource.data.keys().hasOnly(['code', 'email', 'name', 'createdAt'])
+        && request.resource.data.keys().hasAll(['code', 'createdAt'])
+        && request.resource.data.code is string
+        && request.resource.data.code == get(/databases/$(database)/documents/config/signup).data.code
+        && request.resource.data.get('email', '') is string
+        && request.resource.data.get('email', '').size() <= 100
+        && request.resource.data.get('name', '') is string
+        && request.resource.data.get('name', '').size() <= 60
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
     }
 
     match /{document=**} {

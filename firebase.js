@@ -56,6 +56,15 @@ window.FB = {
     return r.user;
   },
   logout() { return signOut(auth); },
+  async registerTeacher(code) {
+    const u = auth.currentUser || await firstUser();
+    await setDoc(doc(db, "teachers", u.uid), {
+      code: String(code || "").trim().slice(0, 60),
+      email: String(u.email || "").slice(0, 100),
+      name: String(u.displayName || "").slice(0, 60),
+      createdAt: serverTimestamp()
+    });
+  },
   async isTeacher(uid) {
     const s = await getDoc(doc(db, "teachers", uid));
     return s.exists();
@@ -64,7 +73,7 @@ window.FB = {
   // ----- 학생: 작품 저장 -----
   // 개인(solo): 같은 기기·반·번호·박자는 한 문서를 덮어써요.
   // 모둠(group): 같은 반·모둠 번호·박자는 한 문서를 모둠 친구들이 함께 덮어써요.
-  async saveCreation({ type, classCode, no, joinKey, beats, mt, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, note = "", ana, src = "", srcFile, submit }) {
+  async saveCreation({ type, classCode, owner, no, joinKey, beats, mt, measures = 1, title = "", fill, cells, bars, arr, dyn, spd, note = "", ana, src = "", srcFile, submit }) {
     const extra = arr ? { bars, arr, dyn, spd, note, src } : {};
     if (arr && mt) extra.mt = mt;
     if (arr && ana) extra.ana = ana;
@@ -80,10 +89,10 @@ window.FB = {
       if (snap.data().submitted === true) {
         throw Object.assign(new Error("submitted"), { code: "submitted" });
       }
-      await updateDoc(ref, { uid: u.uid, joinKey, fill, cells, title, measures, ...extra, updatedAt: serverTimestamp(), ...sub });
+      await updateDoc(ref, { uid: u.uid, owner, joinKey, fill, cells, title, measures, ...extra, updatedAt: serverTimestamp(), ...sub });
     } else {
       await setDoc(ref, {
-        uid: u.uid, type, classCode, no, joinKey, beats, measures, title, fill, cells, ...extra,
+        uid: u.uid, owner, type, classCode, no, joinKey, beats, measures, title, fill, cells, ...extra,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...sub
       });
     }
@@ -105,27 +114,31 @@ window.FB = {
   },
 
   // ----- 비평 -----
-  async saveCritique({ classCode, no, joinKey, group = 0, targetType = "group", work, target, text }) {
+  async saveCritique({ classCode, owner, no, joinKey, group = 0, targetType = "group", work, target, text }) {
     const u = await ensureSignedIn();
     await setDoc(doc(collection(db, "critiques")), {
-      uid: u.uid, type: "solo", classCode, no, joinKey, targetType, ...(group ? { group } : {}), work, target, text, createdAt: serverTimestamp()
+      uid: u.uid, owner, type: "solo", classCode, no, joinKey, targetType, ...(group ? { group } : {}), work, target, text, createdAt: serverTimestamp()
     });
   },
   async listCritiques(code) {
-    const s = await getDocs(query(collection(db, "critiques"), where("classCode", "==", code)));
+    const me = auth.currentUser || await firstUser();
+    const s = await getDocs(query(collection(db, "critiques"), where("classCode", "==", code), where("owner", "==", me.uid)));
     return s.docs.map(d => ({ id: d.id, ...d.data() }));
   },
   deleteCritique(id) { return deleteDoc(doc(db, "critiques", id)); },
 
   // ----- 선생님: 반 관리 -----
   async listClasses() {
-    const s = await getDocs(collection(db, "classes"));
+    const me = auth.currentUser || await firstUser();
+    const s = await getDocs(query(collection(db, "classes"), where("owner", "==", me.uid)));
     return s.docs.map(d => ({ id: d.id, ...d.data() }));
   },
-  async createClass(code) {
-    const ref = doc(db, "classes", code);
-    if ((await getDoc(ref)).exists()) throw Object.assign(new Error("exists"), { code: "exists" });
-    await setDoc(ref, { joinKey: newKey(), open: true, createdAt: serverTimestamp() });
+  // 반 이름은 선생님이 자유롭게 쓰고, 반 코드는 겹치지 않게 자동으로 만들어요.
+  async createClass(name) {
+    const me = auth.currentUser || await firstUser();
+    const code = newKey().slice(0, 8);
+    await setDoc(doc(db, "classes", code), { name: String(name).slice(0, 20), owner: me.uid, joinKey: newKey(), open: true, createdAt: serverTimestamp() });
+    return code;
   },
   setClass(code, patch) { return updateDoc(doc(db, "classes", code), patch); },
 
@@ -141,7 +154,8 @@ window.FB = {
 
   // ----- 선생님: 작품 보기 -----
   async listCreations(code) {
-    const s = await getDocs(query(collection(db, "creations"), where("classCode", "==", code)));
+    const me = auth.currentUser || await firstUser();
+    const s = await getDocs(query(collection(db, "creations"), where("classCode", "==", code), where("owner", "==", me.uid)));
     return s.docs.map(d => ({ id: d.id, ...d.data() }));
   },
   deleteCreation(id) { return deleteDoc(doc(db, "creations", id)); },

@@ -12,7 +12,7 @@ service firebase.storage {
           || request.resource.contentType == 'application/pdf');
       allow read: if request.auth != null
         && (request.auth.uid == uid
-          || firestore.exists(/databases/(default)/documents/teachers/$(request.auth.uid)));
+          || firestore.get(/databases/(default)/documents/classes/$(classCode)).data.owner == request.auth.uid);
       allow update, delete: if false;
     }
 
